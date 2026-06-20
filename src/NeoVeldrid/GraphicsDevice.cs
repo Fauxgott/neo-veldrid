@@ -998,6 +998,30 @@ namespace NeoVeldrid
             }
         }
 
+        /// <summary>
+        /// Retrieves an available <see cref="GraphicsBackend"/> that is supported by the executing platform,
+        /// chosen by order of platform preference.
+        /// </summary>
+        /// <returns>An available <see cref="GraphicsBackend"/> that is supported by the executing platform.</returns>
+        public static GraphicsBackend GetAvailableBackend()
+        {
+#if !EXCLUDE_D3D11_BACKEND
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return GraphicsBackend.Direct3D11;
+#endif
+
+#if !EXCLUDE_VULKAN_BACKEND
+            if (Vk.VkGraphicsDevice.IsSupported())
+                return GraphicsBackend.Vulkan; // Common denominator backend.
+#endif
+
+#if !EXCLUDE_OPENGL_BACKEND                        
+            return GraphicsBackend.OpenGL;
+#endif
+
+            throw new NeoVeldridException("No graphics backend is available. Enable at least one backend.");
+        }
+
 #if !EXCLUDE_D3D11_BACKEND
         /// <summary>
         /// Creates a new <see cref="GraphicsDevice"/> using Direct3D 11.
