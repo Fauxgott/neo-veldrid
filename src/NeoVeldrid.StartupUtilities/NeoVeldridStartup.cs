@@ -17,7 +17,7 @@ namespace NeoVeldrid.StartupUtilities
             => CreateWindowAndGraphicsDevice(
                 windowCI,
                 new GraphicsDeviceOptions(),
-                GetPlatformDefaultBackend(),
+                GraphicsDevice.GetAvailableBackend(),
                 out window,
                 out gd);
 
@@ -26,7 +26,7 @@ namespace NeoVeldrid.StartupUtilities
             GraphicsDeviceOptions deviceOptions,
             out Sdl2Window window,
             out GraphicsDevice gd)
-            => CreateWindowAndGraphicsDevice(windowCI, deviceOptions, GetPlatformDefaultBackend(), out window, out gd);
+            => CreateWindowAndGraphicsDevice(windowCI, deviceOptions, GraphicsDevice.GetAvailableBackend(), out window, out gd);
 
         public static void CreateWindowAndGraphicsDevice(
             WindowCreateInfo windowCI,
@@ -93,9 +93,9 @@ namespace NeoVeldrid.StartupUtilities
         }
 
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window)
-            => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), GetPlatformDefaultBackend());
+            => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), GraphicsDevice.GetAvailableBackend());
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsDeviceOptions options)
-            => CreateGraphicsDevice(window, options, GetPlatformDefaultBackend());
+            => CreateGraphicsDevice(window, options, GraphicsDevice.GetAvailableBackend());
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend preferredBackend)
             => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), preferredBackend);
         public static GraphicsDevice CreateGraphicsDevice(
@@ -160,6 +160,7 @@ namespace NeoVeldrid.StartupUtilities
             }
         }
 
+        [Obsolete("Use GraphicsDevice.GetAvailableBackend() instead.")]
         public static GraphicsBackend GetPlatformDefaultBackend()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
