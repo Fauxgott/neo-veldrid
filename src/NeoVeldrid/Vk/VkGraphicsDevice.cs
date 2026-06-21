@@ -9,7 +9,6 @@ using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.EXT;
 using Silk.NET.Vulkan.Extensions.KHR;
 using Silk.NET.Core;
-using Silk.NET.Core.Native;
 using static NeoVeldrid.Vk.VulkanUtil;
 using VkApi = Silk.NET.Vulkan.Vk;
 using VkSemaphore = Silk.NET.Vulkan.Semaphore;
@@ -654,6 +653,34 @@ namespace NeoVeldrid.Vk
                 _lastValidationError = null;
                 throw new NeoVeldridException("A Vulkan validation error was encountered: " + error);
             }
+        }
+
+        internal static GraphicsApiVersion GetApiVersion()
+        {
+            if (IsSupported())
+            {
+                try
+                {
+                    var vk = VkApi.GetApi();
+
+                    uint apiVersion = 0;
+                    Result enumResult = vk.EnumerateInstanceVersion(ref apiVersion);
+
+                    if (enumResult == Result.Success)
+                    {
+                        Version32 version = (Version32)apiVersion;
+                        return new GraphicsApiVersion((int)version.Major, (int)version.Minor, 0, (int)version.Patch);
+                    }
+                }
+                catch (Exception)
+                {
+                    // If Vulkan is supported but EnumerateInstanceVersion fails, we can assume
+                    // that the version is 1.0 because the function was only added in 1.1.
+                    return new GraphicsApiVersion(1, 0, 0, 0);
+                }
+            }
+
+            return GraphicsApiVersion.Unknown;
         }
 
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]

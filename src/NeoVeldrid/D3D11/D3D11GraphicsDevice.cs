@@ -271,7 +271,7 @@ namespace NeoVeldrid.D3D11
         {
             GraphicsApiVersion result = GraphicsApiVersion.Unknown;
 
-            using var d3d11 = Silk.NET.Direct3D11.D3D11.GetApi(null);
+            var d3d11 = Silk.NET.Direct3D11.D3D11.GetApi(null);
             D3DFeatureLevel[] featureLevels = new[]
             {
                 // Only checks for D3D11 capabilities.
