@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -996,6 +996,23 @@ namespace NeoVeldrid
                 default:
                     throw Illegal.Value<GraphicsBackend>();
             }
+        }
+
+        public static GraphicsApiVersion GetBackendVersion(GraphicsBackend backend)
+        {
+#if !EXCLUDE_D3D11_BACKEND
+            if (backend == GraphicsBackend.Direct3D11 && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return D3D11.D3D11GraphicsDevice.GetApiVersion();
+#endif
+#if !EXCLUDE_VULKAN_BACKEND
+            if (backend == GraphicsBackend.Vulkan && Vk.VkGraphicsDevice.IsSupported())
+                return Vk.VkGraphicsDevice.GetApiVersion();
+#endif
+#if !EXCLUDE_OPENGL_BACKEND
+            if (backend == GraphicsBackend.OpenGL || backend == GraphicsBackend.OpenGLES)
+                return new OpenGL.OpenGLVersionInfo(backend).Version;
+#endif
+            return GraphicsApiVersion.Unknown;
         }
 
 #if !EXCLUDE_D3D11_BACKEND
