@@ -1017,7 +1017,7 @@ namespace NeoVeldrid
             if (backend == GraphicsBackend.OpenGL || backend == GraphicsBackend.OpenGLES)
                 return new OpenGL.OpenGLVersionInfo(backend).Version;
 #endif
-            return GraphicsApiVersion.Unknown;
+            throw new NeoVeldridException("The provided graphics backend is either not supported, not included in the build, or out of bounds of the enumerator type.");
         }
 
 #if !EXCLUDE_D3D11_BACKEND
