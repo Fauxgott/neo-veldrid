@@ -30,6 +30,14 @@ internal sealed class OpenGLVersionInfo
 
             Version = ParseGLVersionString(version);
         }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            string version = (backend == GraphicsBackend.OpenGL)
+                ? Linux.GetOpenGLVersionString()
+                : Linux.GetOpenGLESVersionString();
+
+            Version = ParseGLVersionString(version);
+        }
     }
 
     private GraphicsApiVersion ParseGLVersionString(string version)
@@ -78,24 +86,18 @@ internal sealed class OpenGLVersionInfo
         private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
         [DllImport("user32.dll")]
         private static extern bool DestroyWindow(IntPtr hWnd);
-
         [DllImport("gdi32.dll")]
         private static extern int ChoosePixelFormat(IntPtr hdc, ref PIXELFORMATDESCRIPTOR ppfd);
         [DllImport("gdi32.dll")]
         private static extern bool SetPixelFormat(IntPtr hdc, int format, ref PIXELFORMATDESCRIPTOR ppfd);
-
         [DllImport("opengl32.dll")]
         private static extern IntPtr wglCreateContext(IntPtr hdc);
-
         [DllImport("opengl32.dll")]
         private static extern bool wglMakeCurrent(IntPtr hdc, IntPtr hglrc);
-
         [DllImport("opengl32.dll")]
         private static extern bool wglDeleteContext(IntPtr hglrc);
-
         [DllImport("opengl32.dll")]
         private static extern IntPtr glGetString(uint name);
-
         [DllImport("opengl32.dll", CharSet = CharSet.Ansi)]
         private static extern IntPtr wglGetProcAddress(string lpszProc);
 
@@ -272,6 +274,171 @@ internal sealed class OpenGLVersionInfo
             public uint dwLayerMask;
             public uint dwVisibleMask;
             public uint dwDamageMask;
+        }
+    }
+
+    private static class Linux
+    {
+        [DllImport("libEGL.so.1")]
+        static extern IntPtr eglGetDisplay(IntPtr display_id);
+        [DllImport("libEGL.so.1")]
+        static extern bool eglInitialize(IntPtr dpy, out int major, out int minor);
+        [DllImport("libEGL.so.1")]
+        static extern bool eglBindAPI(uint api);
+        [DllImport("libEGL.so.1")]
+        static extern bool eglChooseConfig(IntPtr dpy, int[] attrib_list, IntPtr[] configs, int config_size, out int num_config);
+        [DllImport("libEGL.so.1")]
+        static extern IntPtr eglCreateContext(IntPtr dpy, IntPtr config, IntPtr share_context, int[] attrib_list);
+        [DllImport("libEGL.so.1")]
+        static extern bool eglMakeCurrent(IntPtr dpy, IntPtr draw, IntPtr read, IntPtr ctx);
+        [DllImport("libEGL.so.1")]
+        static extern bool eglDestroyContext(IntPtr dpy, IntPtr ctx);
+        [DllImport("libEGL.so.1")]
+        static extern bool eglTerminate(IntPtr dpy);
+        [DllImport("libGL.so.1", EntryPoint = "glGetString")]
+        static extern IntPtr glGetString(uint name);
+        [DllImport("libGLESv2.so.2", EntryPoint = "glGetString")]
+        static extern IntPtr glGetStringES(uint name);
+
+        public static string GetOpenGLVersionString()
+        {
+            IntPtr eglDisplay = IntPtr.Zero;
+            IntPtr eglContext = IntPtr.Zero;
+
+            string result = string.Empty;
+            do
+            {
+                eglDisplay = eglGetDisplay(IntPtr.Zero);
+                if (eglDisplay == IntPtr.Zero)
+                    break;
+
+                if (!eglInitialize(eglDisplay, out int major, out int minor))
+                    break;
+
+                if (!eglBindAPI(0x30A2)) // EGL_OPENGL_API
+                    break;
+
+                int[] configAttribs = {
+                    0x3033, // EGL_SURFACE_TYPE
+                    0x0001, // EGL_PBUFFER_BIT
+                    0x3040, // EGL_RENDERABLE_TYPE
+                    0x0008, // EGL_OPENGL_BIT
+                    0x3038, // EGL_NONE
+                };
+
+                IntPtr[] configs = new IntPtr[1];
+                if (!eglChooseConfig(eglDisplay, configAttribs, configs, 1, out int numConfigs) || numConfigs == 0)
+                    break;
+
+                int[] contextAttribs = new int[] { 0x3038 }; // EGL_NONE
+
+                eglContext = eglCreateContext(eglDisplay, configs[0], IntPtr.Zero, contextAttribs);
+                if (eglContext == IntPtr.Zero)
+                    break;
+
+                if (!eglMakeCurrent(eglDisplay, IntPtr.Zero, IntPtr.Zero, eglContext))
+                    break;
+
+                try
+                {
+                    IntPtr versionPtr = glGetString(0x1F02); // GL_VERSION
+                    if (versionPtr == IntPtr.Zero)
+                        break;
+                    result = Marshal.PtrToStringAnsi(versionPtr);
+                }
+                catch (Exception)
+                {
+                    break;
+                }
+
+                break;
+            }
+            while (true);
+
+            if (eglContext != IntPtr.Zero)
+            {
+                eglMakeCurrent(eglDisplay, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                eglDestroyContext(eglDisplay, eglContext);
+            }
+            eglTerminate(eglDisplay);
+
+            return result;
+        }
+
+        public static string GetOpenGLESVersionString()
+        {
+            IntPtr eglDisplay = IntPtr.Zero;
+            IntPtr eglContext = IntPtr.Zero;
+
+            string result = string.Empty;
+            do
+            {
+                eglDisplay = eglGetDisplay(IntPtr.Zero);
+                if (eglDisplay == IntPtr.Zero)
+                    break;
+
+                if (!eglInitialize(eglDisplay, out int major, out int minor))
+                    break;
+
+                if (!eglBindAPI(0x30A0)) // EGL_OPENGL_ES_API
+                    break;
+
+                int[] configAttribs = {
+                    0x3033,             // EGL_SURFACE_TYPE
+                    0x0001,             // EGL_PBUFFER_BIT
+                    0x3040,             // EGL_RENDERABLE_TYPE
+                    0x0040 | 0x0004,    // EGL_OPENGL_ES3_BIT, EGL_OPENGL_ES2_BIT
+                    0x3038,             // EGL_NONE
+                };
+
+                IntPtr[] configs = new IntPtr[1];
+                if (!eglChooseConfig(eglDisplay, configAttribs, configs, 1, out int numConfigs) || numConfigs == 0)
+                    break;
+
+                // This makes sure that EGL tries to get an ES 3.x context first.
+                int[] contextAttribs = new int[]
+                {
+                    0x3098,     // EGL_CONTEXT_CLIENT_VERSION
+                    3, 0x3038,  // EGL_NONE
+                };
+
+                eglContext = eglCreateContext(eglDisplay, configs[0], IntPtr.Zero, contextAttribs);
+                if (eglContext == IntPtr.Zero)
+                {
+                    // If 3.x isn't available, try 2.x.
+                    contextAttribs[1] = 2;
+                    eglContext = eglCreateContext(eglDisplay, configs[0], IntPtr.Zero, contextAttribs);
+                    if (eglContext == IntPtr.Zero)
+                        break;
+                }
+
+                if (!eglMakeCurrent(eglDisplay, IntPtr.Zero, IntPtr.Zero, eglContext))
+                    break;
+
+                try
+                {
+                    IntPtr versionPtr = glGetStringES(0x1F02); // GL_VERSION
+                    if (versionPtr == IntPtr.Zero)
+                        break;
+                    result = Marshal.PtrToStringAnsi(versionPtr);
+                }
+                catch (Exception)
+                {
+                    break;
+                }
+
+                break;
+            }
+            while (true);
+
+            if (eglContext != IntPtr.Zero)
+            {
+                eglMakeCurrent(eglDisplay, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                eglDestroyContext(eglDisplay, eglContext);
+            }
+            eglTerminate(eglDisplay);
+
+            return result;
         }
     }
 }
