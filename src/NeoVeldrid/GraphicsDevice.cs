@@ -1002,7 +1002,9 @@ namespace NeoVeldrid
         /// Retrieves the latest API version of the given <see cref="GraphicsBackend"/>.
         /// </summary>
         /// <param name="backend">The <see cref="GraphicsBackend"/> to get the latest API version for.</param>
-        /// <returns>The latest API version of the given <see cref="GraphicsBackend"/>.</returns>
+        /// <returns>The latest API version of the given <see cref="GraphicsBackend"/>. If <see cref="GraphicsApiVersion.Unknown"/>
+        /// is returned, then the API was detected but the version was unable to be retrieved. If the API is not available
+        /// or included in the build, a <see cref="NeoVeldridException"/> will be thrown.</returns>
         public static GraphicsApiVersion GetBackendVersion(GraphicsBackend backend)
         {
 #if !EXCLUDE_D3D11_BACKEND
