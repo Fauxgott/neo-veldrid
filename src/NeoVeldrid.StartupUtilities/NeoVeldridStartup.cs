@@ -17,7 +17,7 @@ namespace NeoVeldrid.StartupUtilities
             => CreateWindowAndGraphicsDevice(
                 windowCI,
                 new GraphicsDeviceOptions(),
-                GraphicsDevice.GetAvailableBackend(),
+                GraphicsDevice.GetPlatformDefaultBackend(),
                 out window,
                 out gd);
 
@@ -26,7 +26,7 @@ namespace NeoVeldrid.StartupUtilities
             GraphicsDeviceOptions deviceOptions,
             out Sdl2Window window,
             out GraphicsDevice gd)
-            => CreateWindowAndGraphicsDevice(windowCI, deviceOptions, GraphicsDevice.GetAvailableBackend(), out window, out gd);
+            => CreateWindowAndGraphicsDevice(windowCI, deviceOptions, GraphicsDevice.GetPlatformDefaultBackend(), out window, out gd);
 
         public static void CreateWindowAndGraphicsDevice(
             WindowCreateInfo windowCI,
@@ -93,9 +93,9 @@ namespace NeoVeldrid.StartupUtilities
         }
 
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window)
-            => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), GraphicsDevice.GetAvailableBackend());
+            => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), GraphicsDevice.GetPlatformDefaultBackend());
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsDeviceOptions options)
-            => CreateGraphicsDevice(window, options, GraphicsDevice.GetAvailableBackend());
+            => CreateGraphicsDevice(window, options, GraphicsDevice.GetPlatformDefaultBackend());
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend preferredBackend)
             => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), preferredBackend);
         public static GraphicsDevice CreateGraphicsDevice(

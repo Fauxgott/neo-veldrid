@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -999,11 +999,11 @@ namespace NeoVeldrid
         }
 
         /// <summary>
-        /// Retrieves an available <see cref="GraphicsBackend"/> that is supported by the executing platform,
-        /// chosen by order of platform preference.
+        /// Retrieves the default <see cref="GraphicsBackend"/> for the executing platform, chosen by order of
+        /// availability if a backend is not supported or included in the build.
         /// </summary>
-        /// <returns>An available <see cref="GraphicsBackend"/> that is supported by the executing platform.</returns>
-        public static GraphicsBackend GetAvailableBackend()
+        /// <returns>The default <see cref="GraphicsBackend"/> for the executing platform.</returns>
+        public static GraphicsBackend GetPlatformDefaultBackend()
         {
 #if !EXCLUDE_D3D11_BACKEND
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -1016,7 +1016,8 @@ namespace NeoVeldrid
 #endif
 
 #if !EXCLUDE_OPENGL_BACKEND                        
-            return GraphicsBackend.OpenGL;
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return GraphicsBackend.OpenGL;
 #endif
 
             throw new NeoVeldridException("No graphics backend is available. Enable at least one backend.");
