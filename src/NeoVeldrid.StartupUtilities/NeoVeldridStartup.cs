@@ -279,19 +279,19 @@ namespace NeoVeldrid.StartupUtilities
 
             sdl.GLSetAttribute(GLattr.ContextFlags, (int)contextFlags);
 
-            (int major, int minor) = GetMaxGLVersion(backend == GraphicsBackend.OpenGLES);
+            GraphicsApiVersion version = GraphicsDevice.GetBackendVersion(backend);
 
             if (backend == GraphicsBackend.OpenGL)
             {
                 sdl.GLSetAttribute(GLattr.ContextProfileMask, (int)GLprofile.Core);
-                sdl.GLSetAttribute(GLattr.ContextMajorVersion, major);
-                sdl.GLSetAttribute(GLattr.ContextMinorVersion, minor);
+                sdl.GLSetAttribute(GLattr.ContextMajorVersion, version.Major);
+                sdl.GLSetAttribute(GLattr.ContextMinorVersion, version.Minor);
             }
             else
             {
                 sdl.GLSetAttribute(GLattr.ContextProfileMask, (int)GLprofile.ES);
-                sdl.GLSetAttribute(GLattr.ContextMajorVersion, major);
-                sdl.GLSetAttribute(GLattr.ContextMinorVersion, minor);
+                sdl.GLSetAttribute(GLattr.ContextMajorVersion, version.Major);
+                sdl.GLSetAttribute(GLattr.ContextMinorVersion, version.Minor);
             }
 
             int depthBits = 0;
@@ -323,81 +323,6 @@ namespace NeoVeldrid.StartupUtilities
             sdl.GLSetAttribute(GLattr.StencilSize, stencilBits);
 
             sdl.GLSetAttribute(GLattr.FramebufferSrgbCapable, options.SwapchainSrgbFormat ? 1 : 0);
-        }
-
-        private static readonly object s_glVersionLock = new object();
-        private static (int Major, int Minor)? s_maxSupportedGLVersion;
-        private static (int Major, int Minor)? s_maxSupportedGLESVersion;
-
-        private static (int Major, int Minor) GetMaxGLVersion(bool gles)
-        {
-            lock (s_glVersionLock)
-            {
-                (int Major, int Minor)? maxVer = gles ? s_maxSupportedGLESVersion : s_maxSupportedGLVersion;
-                if (maxVer == null)
-                {
-                    maxVer = TestMaxVersion(gles);
-                    if (gles) { s_maxSupportedGLESVersion = maxVer; }
-                    else { s_maxSupportedGLVersion = maxVer; }
-                }
-
-                return maxVer.Value;
-            }
-        }
-
-        private static (int Major, int Minor) TestMaxVersion(bool gles)
-        {
-            (int, int)[] testVersions = gles
-                ? new[] { (3, 2), (3, 0) }
-                : new[] { (4, 6), (4, 3), (4, 0), (3, 3), (3, 0) };
-
-            foreach ((int major, int minor) in testVersions)
-            {
-                if (TestIndividualGLVersion(gles, major, minor)) { return (major, minor); }
-            }
-
-            return (0, 0);
-        }
-
-        private static bool TestIndividualGLVersion(bool gles, int major, int minor)
-        {
-            var sdl = Sdl;
-
-            GLprofile profileMask = gles ? GLprofile.ES : GLprofile.Core;
-
-            sdl.GLSetAttribute(GLattr.ContextProfileMask, (int)profileMask);
-            sdl.GLSetAttribute(GLattr.ContextMajorVersion, major);
-            sdl.GLSetAttribute(GLattr.ContextMinorVersion, minor);
-
-            var window = sdl.CreateWindow(
-                string.Empty,
-                0, 0,
-                1, 1,
-                (uint)(SDL_WindowFlags.Hidden | SDL_WindowFlags.OpenGL));
-
-            string errorString = sdl.GetErrorS();
-
-            if (window == null || !string.IsNullOrEmpty(errorString))
-            {
-                sdl.ClearError();
-                Debug.WriteLine($"Unable to create version {major}.{minor} {profileMask} context.");
-                if (window != null) sdl.DestroyWindow(window);
-                return false;
-            }
-
-            void* context = sdl.GLCreateContext(window);
-            errorString = sdl.GetErrorS();
-            if (!string.IsNullOrEmpty(errorString))
-            {
-                sdl.ClearError();
-                Debug.WriteLine($"Unable to create version {major}.{minor} {profileMask} context.");
-                sdl.DestroyWindow(window);
-                return false;
-            }
-
-            sdl.GLDeleteContext(context);
-            sdl.DestroyWindow(window);
-            return true;
         }
 #endif
 
