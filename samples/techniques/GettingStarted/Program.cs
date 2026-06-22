@@ -60,7 +60,7 @@ void main()
 
             string backendEnv = Environment.GetEnvironmentVariable("NEOVELDRID_BACKEND");
             GraphicsBackend backend = string.IsNullOrEmpty(backendEnv)
-                ? NeoVeldridStartup.GetPlatformDefaultBackend()
+                ? GraphicsDevice.GetPlatformDefaultBackend()
                 : backendEnv.ToLowerInvariant() switch
                 {
                     "d3d11" or "direct3d11" => GraphicsBackend.Direct3D11,

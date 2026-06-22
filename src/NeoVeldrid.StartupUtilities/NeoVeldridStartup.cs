@@ -17,7 +17,7 @@ namespace NeoVeldrid.StartupUtilities
             => CreateWindowAndGraphicsDevice(
                 windowCI,
                 new GraphicsDeviceOptions(),
-                GetPlatformDefaultBackend(),
+                GraphicsDevice.GetPlatformDefaultBackend(),
                 out window,
                 out gd);
 
@@ -26,7 +26,7 @@ namespace NeoVeldrid.StartupUtilities
             GraphicsDeviceOptions deviceOptions,
             out Sdl2Window window,
             out GraphicsDevice gd)
-            => CreateWindowAndGraphicsDevice(windowCI, deviceOptions, GetPlatformDefaultBackend(), out window, out gd);
+            => CreateWindowAndGraphicsDevice(windowCI, deviceOptions, GraphicsDevice.GetPlatformDefaultBackend(), out window, out gd);
 
         public static void CreateWindowAndGraphicsDevice(
             WindowCreateInfo windowCI,
@@ -93,9 +93,9 @@ namespace NeoVeldrid.StartupUtilities
         }
 
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window)
-            => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), GetPlatformDefaultBackend());
+            => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), GraphicsDevice.GetPlatformDefaultBackend());
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsDeviceOptions options)
-            => CreateGraphicsDevice(window, options, GetPlatformDefaultBackend());
+            => CreateGraphicsDevice(window, options, GraphicsDevice.GetPlatformDefaultBackend());
         public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend preferredBackend)
             => CreateGraphicsDevice(window, new GraphicsDeviceOptions(), preferredBackend);
         public static GraphicsDevice CreateGraphicsDevice(
@@ -160,43 +160,8 @@ namespace NeoVeldrid.StartupUtilities
             }
         }
 
-        public static GraphicsBackend GetPlatformDefaultBackend()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-#if !EXCLUDE_D3D11_BACKEND
-                return GraphicsBackend.Direct3D11;
-#elif !EXCLUDE_VULKAN_BACKEND
-                return GraphicsBackend.Vulkan;
-#elif !EXCLUDE_OPENGL_BACKEND
-                return GraphicsBackend.OpenGL;
-#else
-                throw new NeoVeldridException("No graphics backend is available. Enable at least one backend.");
-#endif
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-#if !EXCLUDE_VULKAN_BACKEND
-                return GraphicsBackend.Vulkan; // Via MoltenVK
-#elif !EXCLUDE_OPENGL_BACKEND
-                return GraphicsBackend.OpenGL;
-#else
-                throw new NeoVeldridException("No graphics backend is available. Enable at least one backend.");
-#endif
-            }
-            else
-            {
-#if !EXCLUDE_VULKAN_BACKEND
-                return GraphicsDevice.IsBackendSupported(GraphicsBackend.Vulkan)
-                    ? GraphicsBackend.Vulkan
-                    : GraphicsBackend.OpenGL;
-#elif !EXCLUDE_OPENGL_BACKEND
-                return GraphicsBackend.OpenGL;
-#else
-                throw new NeoVeldridException("No graphics backend is available. Enable at least one backend.");
-#endif
-            }
-        }
+        [Obsolete("Use GraphicsDevice.GetAvailableBackend() directly instead.")]
+        public static GraphicsBackend GetPlatformDefaultBackend() => GraphicsDevice.GetPlatformDefaultBackend();
 
 #if !EXCLUDE_VULKAN_BACKEND
         public static GraphicsDevice CreateVulkanGraphicsDevice(GraphicsDeviceOptions options, Sdl2Window window)
