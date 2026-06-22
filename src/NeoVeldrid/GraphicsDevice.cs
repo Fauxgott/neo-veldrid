@@ -1017,7 +1017,14 @@ namespace NeoVeldrid
 #endif
 #if !EXCLUDE_OPENGL_BACKEND
             if (backend == GraphicsBackend.OpenGL || backend == GraphicsBackend.OpenGLES)
+            {
+                // Throw a specific exception to tell the user that the OpenGL backend
+                // doesn't support OSX.
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    throw new NeoVeldridException("The OpenGL backend doesn't support OSX/MacOS. Please use the Vulkan backend with MoltenVK.");
+
                 return new OpenGL.OpenGLVersionInfo(backend).Version;
+            }
 #endif
             throw new NeoVeldridException("The provided graphics backend is either not supported, not included in the build, or out of bounds of the enumerator type.");
         }
