@@ -1026,7 +1026,10 @@ namespace NeoVeldrid
                 return new OpenGL.OpenGLVersionInfo(backend).Version;
             }
 #endif
+
             throw new NeoVeldridException("The provided graphics backend is either not supported, not included in the build, or out of bounds of the enumerator type.");
+        }
+
         /// Retrieves the default <see cref="GraphicsBackend"/> for the executing platform, chosen by order of
         /// availability if a backend is not supported or included in the build.
         /// </summary>
