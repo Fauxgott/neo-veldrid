@@ -302,15 +302,14 @@ namespace NeoVeldrid.D3D11
 
                         if (hr >= 0)
                         {
-                            // Example: Level111 relates to 11.1.
-                            string levelStr = maxLevel.ToString().Replace("Level", "");
-                            if (levelStr.Length == 3)
-                            {
-                                result = new GraphicsApiVersion(
-                                    Convert.ToInt32(levelStr[..2]),
-                                    Convert.ToInt32(levelStr[2..]),
-                                    0, 0);
-                            }
+                            // Avoids ToString() in case aggressive trimming strips
+                            // enumerator value names. Thanks Microsoft for making
+                            // D3DFeatureLevel values use a hexadecimal pattern!
+                            int raw = (int)maxLevel;
+                            int major = raw >> 12;
+                            int minor = (raw >> 8) & 0xF;
+
+                            result = new GraphicsApiVersion(major, minor, 0, 0);
                         }
                     }
                 }
