@@ -1,3 +1,8 @@
+using Silk.NET.Core;
+using Silk.NET.Core.Loader;
+using Silk.NET.Vulkan;
+using Silk.NET.Vulkan.Extensions.EXT;
+using Silk.NET.Vulkan.Extensions.KHR;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -5,14 +10,10 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Silk.NET.Vulkan;
-using Silk.NET.Vulkan.Extensions.EXT;
-using Silk.NET.Vulkan.Extensions.KHR;
-using Silk.NET.Core;
 using static NeoVeldrid.Vk.VulkanUtil;
 using VkApi = Silk.NET.Vulkan.Vk;
-using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 using VkFenceHandle = Silk.NET.Vulkan.Fence;
+using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 
 namespace NeoVeldrid.Vk
 {
@@ -657,30 +658,34 @@ namespace NeoVeldrid.Vk
 
         internal static GraphicsApiVersion GetApiVersion()
         {
-            if (IsSupported())
+            GraphicsApiVersion result = GraphicsApiVersion.Unknown;
+
+            if (!IsSupported())
+                return result;
+
+            using (var vk = VkApi.GetApi())
             {
                 try
                 {
-                    var vk = VkApi.GetApi();
-
                     uint apiVersion = 0;
                     Result enumResult = vk.EnumerateInstanceVersion(ref apiVersion);
 
                     if (enumResult == Result.Success)
                     {
                         Version32 version = (Version32)apiVersion;
-                        return new GraphicsApiVersion((int)version.Major, (int)version.Minor, 0, (int)version.Patch);
+                        result = new GraphicsApiVersion((int)version.Major, (int)version.Minor, 0, (int)version.Patch);
                     }
                 }
-                catch (Exception)
+                catch (SymbolLoadingException)
                 {
-                    // If Vulkan is supported but EnumerateInstanceVersion fails, we can assume
-                    // that the version is 1.0 because the function was only added in 1.1.
-                    return new GraphicsApiVersion(1, 0, 0, 0);
+                    // By wrapping EnumerateInstanceVersion in a try block and only checking for SymbolLoadingException
+                    // we know that the 1.1 function failed to load but a Vulkan context is available. In this instance,
+                    // we can assume a 1.0 Vulkan version.
+                    result = new GraphicsApiVersion(1, 0, 0, 0);
                 }
             }
 
-            return GraphicsApiVersion.Unknown;
+            return result;
         }
 
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]

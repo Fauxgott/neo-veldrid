@@ -11,7 +11,7 @@ namespace NeoVeldrid
         public int Subminor { get; }
         public int Patch { get; }
 
-        public bool IsKnown => Major > 0 && Minor > 0 && Subminor >= 0 && Patch >= 0;
+        public bool IsKnown => Major > 0 && Minor >= 0 && Subminor >= 0 && Patch >= 0;
 
         public GraphicsApiVersion(int major, int minor, int subminor, int patch)
         {

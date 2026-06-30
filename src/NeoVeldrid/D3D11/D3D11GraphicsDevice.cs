@@ -271,51 +271,54 @@ namespace NeoVeldrid.D3D11
         {
             GraphicsApiVersion result = GraphicsApiVersion.Unknown;
 
-            var d3d11 = Silk.NET.Direct3D11.D3D11.GetApi(null);
-            D3DFeatureLevel[] featureLevels = new[]
+            using (var d3d11 = Silk.NET.Direct3D11.D3D11.GetApi(null))
             {
-                // Only checks for D3D11 capabilities.
-                D3DFeatureLevel.Level111,
-                D3DFeatureLevel.Level110,
-            };
-
-            ComPtr<ID3D11Device> device = default;
-            ComPtr<ID3D11DeviceContext> context = default;
-            D3DFeatureLevel maxLevel;
-
-            unsafe
-            {
-                fixed (D3DFeatureLevel* pFeatureLevels = featureLevels)
+                D3DFeatureLevel[] featureLevels = new[]
                 {
-                    int hr = d3d11.CreateDevice(
-                        default(ComPtr<IDXGIAdapter>),
-                        D3DDriverType.Hardware,
-                        IntPtr.Zero,
-                        (uint)CreateDeviceFlag.None,
-                        pFeatureLevels,
-                        (uint)featureLevels.Length,
-                        Silk.NET.Direct3D11.D3D11.SdkVersion,
-                        ref device,
-                        &maxLevel,
-                        ref context);
+                    // Only checks for D3D11 capabilities.
+                    D3DFeatureLevel.Level111,
+                    D3DFeatureLevel.Level110,
+                };
 
-                    if (hr >= 0)
+                ComPtr<ID3D11Device> device = default;
+                ComPtr<ID3D11DeviceContext> context = default;
+                D3DFeatureLevel maxLevel;
+
+                unsafe
+                {
+                    fixed (D3DFeatureLevel* pFeatureLevels = featureLevels)
                     {
-                        // Example: Level111 relates to 11.1.
-                        string levelStr = maxLevel.ToString().Replace("Level", "");
-                        if (levelStr.Length == 3)
+                        int hr = d3d11.CreateDevice(
+                            default(ComPtr<IDXGIAdapter>),
+                            D3DDriverType.Hardware,
+                            IntPtr.Zero,
+                            (uint)CreateDeviceFlag.None,
+                            pFeatureLevels,
+                            (uint)featureLevels.Length,
+                            Silk.NET.Direct3D11.D3D11.SdkVersion,
+                            ref device,
+                            &maxLevel,
+                            ref context);
+
+                        if (hr >= 0)
                         {
-                            result = new GraphicsApiVersion(
-                                Convert.ToInt32(levelStr[..2]),
-                                Convert.ToInt32(levelStr[2..]),
-                                0, 0);
+                            // Example: Level111 relates to 11.1.
+                            string levelStr = maxLevel.ToString().Replace("Level", "");
+                            if (levelStr.Length == 3)
+                            {
+                                result = new GraphicsApiVersion(
+                                    Convert.ToInt32(levelStr[..2]),
+                                    Convert.ToInt32(levelStr[2..]),
+                                    0, 0);
+                            }
                         }
                     }
                 }
+
+                context.Dispose();
+                device.Dispose();
             }
 
-            context.Dispose();
-            device.Dispose();
             return result;
         }
 
