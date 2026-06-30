@@ -22,38 +22,37 @@ internal sealed class OpenGLVersionInfo
 
     private void GetVersion(GraphicsBackend backend)
     {
+        string versionString = string.Empty;
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            string version = (backend == GraphicsBackend.OpenGL)
+            versionString = (backend == GraphicsBackend.OpenGL)
                 ? Windows.GetOpenGLVersionString()
                 : Windows.GetOpenGLESVersionString();
 
-            Version = ParseGLVersionString(version);
-        }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            string version = (backend == GraphicsBackend.OpenGL)
+            versionString = (backend == GraphicsBackend.OpenGL)
                 ? Linux.GetOpenGLVersionString()
                 : Linux.GetOpenGLESVersionString();
 
-            Version = ParseGLVersionString(version);
-        }
+        GraphicsApiVersion version;
+        TryParseVersionString(versionString, out version);
+        Version = version;
     }
 
-    private GraphicsApiVersion ParseGLVersionString(string version)
+    public static bool TryParseVersionString(string versionString, out GraphicsApiVersion version)
     {
-        GraphicsApiVersion result = GraphicsApiVersion.Unknown;
+        version = GraphicsApiVersion.Unknown;
 
         do
         {
-            if (string.IsNullOrWhiteSpace(version))
+            if (string.IsNullOrWhiteSpace(versionString))
                 break;
 
             // OpenGL / OpenGL ES version strings can have a bunch of boilerplate
             // like vendor information, so this Regex strips it out and just gives
             // us the relevant numbers.
             Regex regex = new Regex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?");
-            Match match = regex.Match(version);
+            Match match = regex.Match(versionString);
             if (!match.Success)
                 break;
 
@@ -65,13 +64,16 @@ internal sealed class OpenGLVersionInfo
             if (match.Groups["patch"].Success)
                 patch = int.Parse(match.Groups["patch"].Value);
 
-            result = new GraphicsApiVersion(major, minor, 0, patch);
+            version = new GraphicsApiVersion(major, minor, 0, patch);
 
             break;
         }
         while (true);
 
-        return result;
+        if (version != GraphicsApiVersion.Unknown)
+            return true;
+
+        return false;
     }
 
     private static class Windows

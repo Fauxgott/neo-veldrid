@@ -1,7 +1,8 @@
+using System;
 
 namespace NeoVeldrid
 {
-    public readonly struct GraphicsApiVersion
+    public readonly struct GraphicsApiVersion : IEquatable<GraphicsApiVersion>
     {
         public static GraphicsApiVersion Unknown => default;
 
@@ -26,42 +27,31 @@ namespace NeoVeldrid
         }
 
         /// <summary>
-        /// Parses OpenGL version strings with either of following formats:
-        /// <list type="bullet">
-        ///   <item>
-        ///     <description>major_number.minor_number</description>
-        ///   </item>
-        ///   <item>
-        ///     <description>major_number.minor_number.release_number</description>
-        ///   </item>
-        /// </list>
+        /// Parses OpenGL version strings and extracts the version number without specific vendor or API information.
         /// </summary>
         /// <param name="versionString">The OpenGL version string.</param>
         /// <param name="version">The parsed <see cref="GraphicsApiVersion"/>.</param>
         /// <returns>True whether the parse succeeded; otherwise false.</returns>
+        [Obsolete("This should not be publicly exposed and will be removed in a future version.")]
         public static bool TryParseGLVersion(string versionString, out GraphicsApiVersion version)
+            => OpenGL.OpenGLVersionInfo.TryParseVersionString(versionString, out version);
+
+        public override int GetHashCode() => HashCode.Combine(Major, Minor, Subminor, Patch);
+
+        public override bool Equals(object obj) => obj is GraphicsApiVersion && Equals((GraphicsApiVersion)obj);
+
+        public bool Equals(GraphicsApiVersion other)
         {
-            string[] versionParts = versionString.Split(' ')[0].Split('.');
+            if (Major == other.Major && Minor == other.Minor &&
+                Subminor == other.Subminor && Patch == other.Patch)
+                return true;
 
-            if (!int.TryParse(versionParts[0], out int major) ||
-               !int.TryParse(versionParts[1], out int minor))
-            {
-                version = default;
-                return false;
-            }
-
-            int releaseNumber = 0;
-            if (versionParts.Length == 3)
-            {
-                if (!int.TryParse(versionParts[2], out releaseNumber))
-                {
-                    version = default;
-                    return false;
-                }
-            }
-
-            version = new GraphicsApiVersion(major, minor, 0, releaseNumber);
-            return true;
+            return false;
         }
+
+        public static bool operator ==(GraphicsApiVersion version1, GraphicsApiVersion version2)
+            => version1.Equals(version2);
+        public static bool operator !=(GraphicsApiVersion version1, GraphicsApiVersion version2)
+            => !(version1 == version2);
     }
 }

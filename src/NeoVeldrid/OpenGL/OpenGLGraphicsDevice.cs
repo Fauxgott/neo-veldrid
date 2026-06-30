@@ -182,7 +182,7 @@ namespace NeoVeldrid.OpenGL
             GL.GetInteger(GetPName.MinorVersion, out minorVersion);
             CheckLastError();
 
-            GraphicsApiVersion.TryParseGLVersion(_version, out _apiVersion);
+            OpenGLVersionInfo.TryParseVersionString(_version, out _apiVersion);
             if (_apiVersion.Major != majorVersion ||
                 _apiVersion.Minor != minorVersion)
             {
