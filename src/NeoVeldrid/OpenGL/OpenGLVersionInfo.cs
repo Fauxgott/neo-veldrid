@@ -288,7 +288,7 @@ namespace NeoVeldrid.OpenGL
 
                 int[] attribs = new int[]
                 {
-                    0x2091, 2,      // WGL_CONTEXT_MAJOR_VERSION_ARB
+                    0x2091, 3,      // WGL_CONTEXT_MAJOR_VERSION_ARB
                     0x2092, 0,      // WGL_CONTEXT_MINOR_VERSION_ARB
                     0x9126,         // WGL_CONTEXT_PROFILE_MASK_ARB
                     0x00000004,     // WGL_CONTEXT_ES2_PROFILE_BIT_EXT
@@ -297,7 +297,15 @@ namespace NeoVeldrid.OpenGL
 
                 IntPtr esContext = createContextAttribs(hdc, IntPtr.Zero, attribs);
                 if (esContext == IntPtr.Zero)
-                    break;
+                {
+                    // If 3.x isn't available, try 2.x.
+                    attribs[1] = 2; // Change WGL_CONTEXT_MAJOR_VERSION_ARB to 2
+                    esContext = createContextAttribs(hdc, IntPtr.Zero, attribs);
+
+                    if (esContext == IntPtr.Zero)
+                        break;
+                }
+
                 wglMakeCurrent(hdc, esContext);
 
                 IntPtr versionPtr = glGetString(0x1F02); // GL_VERSION
