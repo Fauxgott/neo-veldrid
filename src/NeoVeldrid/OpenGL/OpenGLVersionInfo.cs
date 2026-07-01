@@ -383,6 +383,8 @@ namespace NeoVeldrid.OpenGL
         private static extern bool eglDestroyContext(IntPtr dpy, IntPtr ctx);
         [DllImport("libEGL.dll")]
         private static extern bool eglTerminate(IntPtr dpy);
+        [DllImport("libEGL.dll")]
+        public static extern IntPtr eglQueryString(IntPtr dpy, int name);
         [DllImport("libGLESv2.dll", EntryPoint = "glGetString")]
         private static extern IntPtr glGetString(uint name);
 
@@ -390,12 +392,15 @@ namespace NeoVeldrid.OpenGL
         {
             IntPtr eglDisplay = IntPtr.Zero;
             IntPtr eglContext = IntPtr.Zero;
-            string result = string.Empty;
 
+            string result = string.Empty;
+            bool isBorrowedDisplay = false;
             do
             {
                 eglDisplay = eglGetDisplay(IntPtr.Zero);
                 if (eglDisplay == IntPtr.Zero) break;
+
+                isBorrowedDisplay = eglQueryString(eglDisplay, 0x3055) != IntPtr.Zero;
 
                 if (!eglInitialize(eglDisplay, out int major, out int minor)) break;
                 if (!eglBindAPI(0x30A0)) break; // EGL_OPENGL_ES_API
@@ -436,7 +441,7 @@ namespace NeoVeldrid.OpenGL
                 eglMakeCurrent(eglDisplay, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                 eglDestroyContext(eglDisplay, eglContext);
             }
-            if (eglDisplay != IntPtr.Zero)
+            if (!isBorrowedDisplay)
                 eglTerminate(eglDisplay);
 
             return result;
@@ -461,6 +466,8 @@ namespace NeoVeldrid.OpenGL
         private static extern bool eglDestroyContext(IntPtr dpy, IntPtr ctx);
         [DllImport("libEGL.so.1")]
         private static extern bool eglTerminate(IntPtr dpy);
+        [DllImport("libEGL.so.1")]
+        public static extern IntPtr eglQueryString(IntPtr dpy, int name);
         [DllImport("libGL.so.1", EntryPoint = "glGetString")]
         private static extern IntPtr glGetString(uint name);
         [DllImport("libGLESv2.so.2", EntryPoint = "glGetString")]
@@ -472,11 +479,14 @@ namespace NeoVeldrid.OpenGL
             IntPtr eglContext = IntPtr.Zero;
 
             string result = string.Empty;
+            bool isBorrowedDisplay = false;
             do
             {
                 eglDisplay = eglGetDisplay(IntPtr.Zero);
                 if (eglDisplay == IntPtr.Zero)
                     break;
+
+                isBorrowedDisplay = eglQueryString(eglDisplay, 0x3055) != IntPtr.Zero;
 
                 if (!eglInitialize(eglDisplay, out int major, out int minor))
                     break;
@@ -488,12 +498,12 @@ namespace NeoVeldrid.OpenGL
                 int[] minorVersions = { 6, 5, 4, 3, 2, 1, 0, 3 };
 
                 int[] configAttribs = {
-                0x3033, // EGL_SURFACE_TYPE
-                0x0001, // EGL_PBUFFER_BIT
-                0x3040, // EGL_RENDERABLE_TYPE
-                0x0008, // EGL_OPENGL_BIT
-                0x3038, // EGL_NONE
-            };
+                    0x3033, // EGL_SURFACE_TYPE
+                    0x0001, // EGL_PBUFFER_BIT
+                    0x3040, // EGL_RENDERABLE_TYPE
+                    0x0008, // EGL_OPENGL_BIT
+                    0x3038, // EGL_NONE
+                };
 
                 IntPtr[] configs = new IntPtr[1];
                 if (!eglChooseConfig(eglDisplay, configAttribs, configs, 1, out int numConfigs) || numConfigs == 0)
@@ -532,7 +542,9 @@ namespace NeoVeldrid.OpenGL
                 eglMakeCurrent(eglDisplay, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                 eglDestroyContext(eglDisplay, eglContext);
             }
-            eglTerminate(eglDisplay);
+
+            if (!isBorrowedDisplay)
+                eglTerminate(eglDisplay);
 
             return result;
         }
