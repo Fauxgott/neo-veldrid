@@ -72,8 +72,11 @@ namespace NeoVeldrid.OpenGL
                         }
                         catch (DllNotFoundException)
                         {
-                            versionString = OpenGLWglVersionProber.GetOpenGLESVersionString();
+                            versionString = string.Empty;
                         }
+
+                        if (string.IsNullOrEmpty(versionString))
+                            versionString = OpenGLWglVersionProber.GetOpenGLESVersionString();
                     }
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -86,6 +89,11 @@ namespace NeoVeldrid.OpenGL
                             versionString = OpenGLEglVersionProber.GetOpenGLESVersionString();
                     }
                     catch (DllNotFoundException)
+                    {
+                        versionString = string.Empty;
+                    }
+
+                    if (string.IsNullOrEmpty(versionString))
                     {
                         if (backend == GraphicsBackend.OpenGL)
                             versionString = OpenGLGlxVersionProber.GetOpenGLVersionString();
