@@ -1023,7 +1023,7 @@ namespace NeoVeldrid
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     throw new NeoVeldridException("The OpenGL backend doesn't support OSX/MacOS. Please use the Vulkan backend with MoltenVK.");
 
-                return new OpenGL.OpenGLVersionInfo(backend).Version;
+                return OpenGL.OpenGLVersionInfo.GetApiVersion(backend);
             }
 #endif
 
