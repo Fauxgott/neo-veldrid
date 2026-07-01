@@ -983,7 +983,7 @@ namespace NeoVeldrid
 #endif
                 case GraphicsBackend.OpenGL:
 #if !EXCLUDE_OPENGL_BACKEND
-                    return true;
+                    return !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #else
                     return false;
 #endif
