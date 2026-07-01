@@ -642,6 +642,8 @@ namespace NeoVeldrid.OpenGL
         private static extern bool glXMakeCurrent(IntPtr dpy, IntPtr drawable, IntPtr ctx);
         [DllImport("libGL.so.1")]
         private static extern void glXDestroyContext(IntPtr dpy, IntPtr ctx);
+        [DllImport("libX11.so.6")]
+        private static extern int XFree(IntPtr data);
         [DllImport("libGL.so.1", EntryPoint = "glGetString")]
         private static extern IntPtr glGetString(uint name);
         [DllImport("libGL.so.1", CharSet = CharSet.Ansi)]
@@ -652,6 +654,7 @@ namespace NeoVeldrid.OpenGL
             IntPtr display = IntPtr.Zero;
             IntPtr window = IntPtr.Zero;
             IntPtr context = IntPtr.Zero;
+            IntPtr visual = IntPtr.Zero;
 
             string result = string.Empty;
             do
@@ -668,7 +671,7 @@ namespace NeoVeldrid.OpenGL
                 0  // None
             };
 
-                IntPtr visual = glXChooseVisual(display, 0, visualAttribs);
+                visual = glXChooseVisual(display, 0, visualAttribs);
                 if (visual == IntPtr.Zero) break;
 
                 IntPtr rootWindow = XDefaultRootWindow(display);
@@ -694,6 +697,7 @@ namespace NeoVeldrid.OpenGL
                 glXDestroyContext(display, context);
             }
             if (window != IntPtr.Zero) XDestroyWindow(display, window);
+            if (visual != IntPtr.Zero) XFree(visual);
             if (display != IntPtr.Zero) XCloseDisplay(display);
 
             return result;
@@ -725,6 +729,7 @@ namespace NeoVeldrid.OpenGL
 
                 // Get the first FBConfig pointer from the array
                 IntPtr fbConfig = Marshal.ReadIntPtr(fbConfigs);
+                XFree(fbConfigs);
 
                 IntPtr rootWindow = XDefaultRootWindow(display);
                 window = XCreateSimpleWindow(display, rootWindow, 0, 0, 1, 1, 0, UIntPtr.Zero, UIntPtr.Zero);
