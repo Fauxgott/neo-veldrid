@@ -4,8 +4,11 @@ using System.Text.RegularExpressions;
 
 namespace NeoVeldrid.OpenGL
 {
-    public static class OpenGLVersionInfo
+    public static partial class OpenGLVersionInfo
     {
+        [GeneratedRegex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?")]
+        private static partial Regex ParseVersionRegex();
+
         private static readonly object _lock = new();
         private static GraphicsApiVersion _cachedOpenGLVersion = GraphicsApiVersion.Unknown;
         private static GraphicsApiVersion _cachedOpenGLESVersion = GraphicsApiVersion.Unknown;
@@ -22,8 +25,7 @@ namespace NeoVeldrid.OpenGL
                 // OpenGL / OpenGL ES version strings can have a bunch of boilerplate
                 // like vendor information, so this Regex strips it out and just gives
                 // us the relevant numbers.
-                Regex regex = new Regex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?");
-                Match match = regex.Match(versionString);
+                Match match = ParseVersionRegex().Match(versionString);
                 if (!match.Success)
                     break;
 
