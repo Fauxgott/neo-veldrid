@@ -105,7 +105,15 @@ namespace NeoVeldrid.OpenGL
                 }
 
                 TryParseVersionString(versionString, out result);
-                CacheApiVersion(backend, result);
+
+                // If the OpenGL version < 3.2, we have failed to return a valid OpenGL version.
+                if (backend == GraphicsBackend.OpenGL &&
+                    (result.Major < 3 ||
+                    (result.Major == 3 && result.Minor < 2)))
+                    result = GraphicsApiVersion.Unknown;
+
+                if (result != GraphicsApiVersion.Unknown)
+                    CacheApiVersion(backend, result);
             }
 
             return result;
@@ -200,6 +208,16 @@ namespace NeoVeldrid.OpenGL
                 if (context == IntPtr.Zero)
                     break;
                 wglMakeCurrent(hdc, context);
+
+                // Checking for Microsoft software rasterizer fallback. If we are given that,
+                // the method failed.
+                IntPtr rendererPtr = glGetString(0x1F01); // GL_RENDERER
+                if (rendererPtr != IntPtr.Zero)
+                {
+                    string renderer = Marshal.PtrToStringAnsi(rendererPtr);
+                    if (!string.IsNullOrEmpty(renderer) && renderer.Contains("GDI Generic"))
+                        break;
+                }
 
                 IntPtr versionPtr = glGetString(0x1F02); // GL_VERSION
                 if (versionPtr == IntPtr.Zero)
