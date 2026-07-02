@@ -18,9 +18,9 @@ indent_size = 2
 [*.cs]
 dotnet_diagnostic.CS1574.severity = error
 
-# IDE0160: File-scoped namespaces.
+# IDE0161: File-scoped namespaces.
 csharp_style_namespace_declarations = file_scoped:error
-dotnet_diagnostic.IDE0160.severity = error
+dotnet_diagnostic.IDE0161.severity = error
 
 # IDE0251: Member can be made 'readonly'.
 csharp_style_prefer_readonly_struct_member = true
