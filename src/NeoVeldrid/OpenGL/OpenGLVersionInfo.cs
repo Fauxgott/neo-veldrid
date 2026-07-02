@@ -1,53 +1,13 @@
 using System;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 
 namespace NeoVeldrid.OpenGL
 {
-    internal static partial class OpenGLVersionInfo
+    internal static class OpenGLVersionInfo
     {
-        [GeneratedRegex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?:(?<subminor>\d+)\.)?(?<patch>\d+))?")]
-        private static partial Regex ParseVersionRegex();
-
         private static readonly object _lock = new();
         private static GraphicsApiVersion _cachedOpenGLVersion = GraphicsApiVersion.Unknown;
         private static GraphicsApiVersion _cachedOpenGLESVersion = GraphicsApiVersion.Unknown;
-
-        public static bool TryParseVersionString(string versionString, out GraphicsApiVersion version)
-        {
-            version = GraphicsApiVersion.Unknown;
-
-            do
-            {
-                if (string.IsNullOrWhiteSpace(versionString))
-                    break;
-
-                // OpenGL / OpenGL ES version strings can have a bunch of boilerplate
-                // like vendor information, so this Regex strips it out and just gives
-                // us the relevant numbers.
-                Match match = ParseVersionRegex().Match(versionString);
-                if (!match.Success)
-                    break;
-
-                int major = int.Parse(match.Groups["major"].Value);
-                int minor = int.Parse(match.Groups["minor"].Value);
-
-                // Patch is not guaranteed to be present in OpenGL versions strings.
-                int patch = 0;
-                if (match.Groups["patch"].Success)
-                    patch = int.Parse(match.Groups["patch"].Value);
-
-                version = new GraphicsApiVersion(major, minor, 0, patch);
-
-                break;
-            }
-            while (true);
-
-            if (version != GraphicsApiVersion.Unknown)
-                return true;
-
-            return false;
-        }
 
         public static GraphicsApiVersion GetApiVersion(GraphicsBackend backend)
         {
@@ -104,7 +64,7 @@ namespace NeoVeldrid.OpenGL
                     }
                 }
 
-                TryParseVersionString(versionString, out result);
+                GraphicsApiVersion.TryParseVersion(versionString, out result);
 
                 // If the OpenGL version < 3.2, we have failed to return a valid OpenGL version.
                 if (backend == GraphicsBackend.OpenGL &&
