@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Numerics;
 
-namespace NeoVeldrid.NeoDemo
+namespace NeoVeldrid.NeoDemo;
+
+internal class RenderOrderKeyComparer : IComparer<Renderable>
 {
-    internal class RenderOrderKeyComparer : IComparer<Renderable>
+    public Vector3 CameraPosition { get; set; }
+    public int Compare(Renderable x, Renderable y)
     {
-        public Vector3 CameraPosition { get; set; }
-        public int Compare(Renderable x, Renderable y)
-        {
-            return x.GetRenderOrderKey(CameraPosition).CompareTo(y.GetRenderOrderKey(CameraPosition));
-        }
+        return x.GetRenderOrderKey(CameraPosition).CompareTo(y.GetRenderOrderKey(CameraPosition));
     }
 }

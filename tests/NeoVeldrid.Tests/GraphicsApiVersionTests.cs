@@ -1,43 +1,42 @@
 using Xunit;
 
-namespace NeoVeldrid.Tests
+namespace NeoVeldrid.Tests;
+
+public class GraphicsApiVersionTests
 {
-    public class GraphicsApiVersionTests
+    [Theory]
+    [InlineData("2.1", 2, 1, 0, 0)]
+    [InlineData("3.3.0", 3, 3, 0, 0)]
+    [InlineData("4.6.3", 4, 6, 0, 3)] // third component is a release/patch, Subminor stays 0
+    [InlineData("4.1.0-beta", 4, 1, 0, 0)]
+    [InlineData("4.6.0 NVIDIA 510.06", 4, 6, 0, 0)]
+    [InlineData("OpenGL ES 3.2 Mesa 22.0.1", 3, 2, 0, 0)]
+    public void TryParseGLVersion_Succeeds(string input, int major, int minor, int subminor, int patch)
     {
-        [Theory]
-        [InlineData("2.1", 2, 1, 0, 0)]
-        [InlineData("3.3.0", 3, 3, 0, 0)]
-        [InlineData("4.6.3", 4, 6, 0, 3)] // third component is a release/patch, Subminor stays 0
-        [InlineData("4.1.0-beta", 4, 1, 0, 0)]
-        [InlineData("4.6.0 NVIDIA 510.06", 4, 6, 0, 0)]
-        [InlineData("OpenGL ES 3.2 Mesa 22.0.1", 3, 2, 0, 0)]
-        public void TryParseGLVersion_Succeeds(string input, int major, int minor, int subminor, int patch)
-        {
-            bool success = GraphicsApiVersion.TryParseGLVersion(input, out var version);
-            Assert.True(success);
-            Assert.Equal(major, version.Major);
-            Assert.Equal(minor, version.Minor);
-            Assert.Equal(subminor, version.Subminor);
-            Assert.Equal(patch, version.Patch);
-        }
+        bool success = GraphicsApiVersion.TryParseGLVersion(input, out var version);
+        Assert.True(success);
+        Assert.Equal(major, version.Major);
+        Assert.Equal(minor, version.Minor);
+        Assert.Equal(subminor, version.Subminor);
+        Assert.Equal(patch, version.Patch);
+    }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("   ")]
-        [InlineData("OpenGL")]
-        [InlineData("5")] // a lone major is not a version
-        public void TryParseGLVersion_Fails(string input)
-        {
-            bool success = GraphicsApiVersion.TryParseGLVersion(input, out var version);
-            Assert.False(success);
-            Assert.Equal(GraphicsApiVersion.Unknown, version);
-        }
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("OpenGL")]
+    [InlineData("5")] // a lone major is not a version
+    public void TryParseGLVersion_Fails(string input)
+    {
+        bool success = GraphicsApiVersion.TryParseGLVersion(input, out var version);
+        Assert.False(success);
+        Assert.Equal(GraphicsApiVersion.Unknown, version);
+    }
 
-        [Fact]
-        public void TryParseGLVersion_Null_Fails()
-        {
-            Assert.False(GraphicsApiVersion.TryParseGLVersion(null!, out var version));
-            Assert.Equal(GraphicsApiVersion.Unknown, version);
-        }
+    [Fact]
+    public void TryParseGLVersion_Null_Fails()
+    {
+        Assert.False(GraphicsApiVersion.TryParseGLVersion(null!, out var version));
+        Assert.Equal(GraphicsApiVersion.Unknown, version);
     }
 }

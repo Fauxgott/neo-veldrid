@@ -1,15 +1,14 @@
-﻿using System;
+using System;
 using System.Numerics;
 
-namespace NeoVeldrid.NeoDemo
+namespace NeoVeldrid.NeoDemo;
+
+public struct MaterialProperties
 {
-    public struct MaterialProperties
-    {
-        public Vector3 SpecularIntensity;
-        public float SpecularPower;
+    public Vector3 SpecularIntensity;
+    public float SpecularPower;
 #pragma warning disable 0169
-        private Vector3 _padding0;
+    private Vector3 _padding0;
 #pragma warning restore 0169
-        public float Reflectivity;
-    }
+    public float Reflectivity;
 }

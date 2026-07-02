@@ -1,14 +1,13 @@
-﻿using SampleBase;
+using SampleBase;
 
-namespace ComputeParticles
+namespace ComputeParticles;
+
+class Program
 {
-    class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Compute Particles");
-            ComputeParticles computeParticles = new ComputeParticles(window);
-            window.Run();
-        }
+        NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Compute Particles");
+        ComputeParticles computeParticles = new ComputeParticles(window);
+        window.Run();
     }
 }

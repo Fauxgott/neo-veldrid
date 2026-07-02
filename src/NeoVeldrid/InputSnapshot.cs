@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Numerics;
 
-namespace NeoVeldrid
+namespace NeoVeldrid;
+
+public interface InputSnapshot
 {
-    public interface InputSnapshot
-    {
-        IReadOnlyList<KeyEvent> KeyEvents { get; }
-        IReadOnlyList<MouseEvent> MouseEvents { get; }
-        IReadOnlyList<char> KeyCharPresses { get; }
-        bool IsMouseDown(MouseButton button);
-        Vector2 MousePosition { get; }
-        float WheelDelta { get; }
-    }
+    IReadOnlyList<KeyEvent> KeyEvents { get; }
+    IReadOnlyList<MouseEvent> MouseEvents { get; }
+    IReadOnlyList<char> KeyCharPresses { get; }
+    bool IsMouseDown(MouseButton button);
+    Vector2 MousePosition { get; }
+    float WheelDelta { get; }
 }

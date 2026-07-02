@@ -1,16 +1,15 @@
-﻿using System.Numerics;
+using System.Numerics;
 
-namespace NeoVeldrid.NeoDemo
+namespace NeoVeldrid.NeoDemo;
+
+public struct ClipPlaneInfo
 {
-    public struct ClipPlaneInfo
-    {
-        public Vector4 ClipPlane;
-        public int Enabled;
+    public Vector4 ClipPlane;
+    public int Enabled;
 
-        public ClipPlaneInfo(Plane clipPlane, bool enabled)
-        {
-            ClipPlane = new Vector4(clipPlane.Normal, clipPlane.D);
-            Enabled = enabled ? 1 : 0;
-        }
+    public ClipPlaneInfo(Plane clipPlane, bool enabled)
+    {
+        ClipPlane = new Vector4(clipPlane.Normal, clipPlane.D);
+        Enabled = enabled ? 1 : 0;
     }
 }

@@ -1,79 +1,78 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using AssetPrimitives;
 
-namespace AssetProcessor
+namespace AssetProcessor;
+
+class Program
 {
-    class Program
+    private static readonly Dictionary<string, BinaryAssetProcessor> s_assetProcessors = GetAssetProcessors();
+    private static readonly Dictionary<Type, BinaryAssetSerializer> s_assetSerializers = DefaultSerializers.Get();
+
+    private static Dictionary<string, BinaryAssetProcessor> GetAssetProcessors()
     {
-        private static readonly Dictionary<string, BinaryAssetProcessor> s_assetProcessors = GetAssetProcessors();
-        private static readonly Dictionary<Type, BinaryAssetSerializer> s_assetSerializers = DefaultSerializers.Get();
+        ImageSharpProcessor texProcessor = new ImageSharpProcessor();
+        AssimpProcessor assimpProcessor = new AssimpProcessor();
 
-        private static Dictionary<string, BinaryAssetProcessor> GetAssetProcessors()
+        return new Dictionary<string, BinaryAssetProcessor>()
         {
-            ImageSharpProcessor texProcessor = new ImageSharpProcessor();
-            AssimpProcessor assimpProcessor = new AssimpProcessor();
+            { ".png", texProcessor },
+            { ".ktx", new KtxFileProcessor() },
+            { ".dae", assimpProcessor },
+            { ".obj", assimpProcessor },
+        };
+    }
 
-            return new Dictionary<string, BinaryAssetProcessor>()
-            {
-                { ".png", texProcessor },
-                { ".ktx", new KtxFileProcessor() },
-                { ".dae", assimpProcessor },
-                { ".obj", assimpProcessor },
-            };
+    static int Main(string[] args)
+    {
+        string outputDirectory = args[0];
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
         }
 
-        static int Main(string[] args)
+        for (int i = 1; i < args.Length; i++)
         {
-            string outputDirectory = args[0];
-            if (!Directory.Exists(outputDirectory))
+            string arg = args[i];
+            Console.WriteLine($"Processing {arg}");
+
+            string extension = Path.GetExtension(arg);
+            if (string.IsNullOrEmpty(extension))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Console.Error.WriteLine($"Invalid path: {arg}");
+                return -1;
             }
 
-            for (int i = 1; i < args.Length; i++)
+            if (!s_assetProcessors.TryGetValue(extension, out BinaryAssetProcessor processor))
             {
-                string arg = args[i];
-                Console.WriteLine($"Processing {arg}");
-
-                string extension = Path.GetExtension(arg);
-                if (string.IsNullOrEmpty(extension))
-                {
-                    Console.Error.WriteLine($"Invalid path: {arg}");
-                    return -1;
-                }
-
-                if (!s_assetProcessors.TryGetValue(extension, out BinaryAssetProcessor processor))
-                {
-                    Console.Error.WriteLine($"Unable to process asset with extension {extension}.");
-                    return -1;
-                }
-
-                object processedAsset;
-                using (FileStream fs = File.OpenRead(arg))
-                {
-                    processedAsset = processor.Process(fs, extension);
-                }
-
-                Type assetType = processedAsset.GetType();
-                if (!s_assetSerializers.TryGetValue(assetType, out BinaryAssetSerializer serializer))
-                {
-                    Console.Error.WriteLine($"Unable to serialize asset of type {assetType}.");
-                    return -1;
-                }
-
-                string fileName = Path.GetFileNameWithoutExtension(arg);
-                string outputFileName = Path.Combine(outputDirectory, fileName + ".binary");
-                using (FileStream outFS = File.Create(outputFileName))
-                {
-                    BinaryWriter writer = new BinaryWriter(outFS);
-                    serializer.Write(writer, processedAsset);
-                }
-                Console.WriteLine($"Processed asset: {arg} => {outputFileName}");
+                Console.Error.WriteLine($"Unable to process asset with extension {extension}.");
+                return -1;
             }
 
-            return 0;
+            object processedAsset;
+            using (FileStream fs = File.OpenRead(arg))
+            {
+                processedAsset = processor.Process(fs, extension);
+            }
+
+            Type assetType = processedAsset.GetType();
+            if (!s_assetSerializers.TryGetValue(assetType, out BinaryAssetSerializer serializer))
+            {
+                Console.Error.WriteLine($"Unable to serialize asset of type {assetType}.");
+                return -1;
+            }
+
+            string fileName = Path.GetFileNameWithoutExtension(arg);
+            string outputFileName = Path.Combine(outputDirectory, fileName + ".binary");
+            using (FileStream outFS = File.Create(outputFileName))
+            {
+                BinaryWriter writer = new BinaryWriter(outFS);
+                serializer.Write(writer, processedAsset);
+            }
+            Console.WriteLine($"Processed asset: {arg} => {outputFileName}");
         }
+
+        return 0;
     }
 }

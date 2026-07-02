@@ -1,7 +1,6 @@
-﻿namespace NeoVeldrid.NeoDemo
+namespace NeoVeldrid.NeoDemo;
+
+public interface IUpdateable
 {
-    public interface IUpdateable
-    {
-        void Update(float deltaSeconds);
-    }
+    void Update(float deltaSeconds);
 }

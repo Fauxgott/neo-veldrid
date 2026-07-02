@@ -1,43 +1,42 @@
-﻿using System;
+using System;
 
-namespace NeoVeldrid.NeoDemo
+namespace NeoVeldrid.NeoDemo;
+
+public struct ShaderSetCacheKey : IEquatable<ShaderSetCacheKey>
 {
-    public struct ShaderSetCacheKey : IEquatable<ShaderSetCacheKey>
+    public string Name { get; }
+    public SpecializationConstant[] Specializations { get; }
+
+    public ShaderSetCacheKey(string name, SpecializationConstant[] specializations) : this()
     {
-        public string Name { get; }
-        public SpecializationConstant[] Specializations { get; }
+        Name = name;
+        Specializations = specializations;
+    }
 
-        public ShaderSetCacheKey(string name, SpecializationConstant[] specializations) : this()
+    public readonly bool Equals(ShaderSetCacheKey other)
+    {
+        return Name.Equals(other.Name) && ArraysEqual(Specializations, other.Specializations);
+    }
+
+    public override readonly int GetHashCode()
+    {
+        int hash = Name.GetHashCode();
+        foreach (var specConst in Specializations)
         {
-            Name = name;
-            Specializations = specializations;
+            hash ^= specConst.GetHashCode();
+        }
+        return hash;
+    }
+
+    private readonly bool ArraysEqual<T>(T[] a, T[] b) where T : IEquatable<T>
+    {
+        if (a.Length != b.Length) { return false; }
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (!a[i].Equals(b[i])) { return false; }
         }
 
-        public readonly bool Equals(ShaderSetCacheKey other)
-        {
-            return Name.Equals(other.Name) && ArraysEqual(Specializations, other.Specializations);
-        }
-
-        public override readonly int GetHashCode()
-        {
-            int hash = Name.GetHashCode();
-            foreach (var specConst in Specializations)
-            {
-                hash ^= specConst.GetHashCode();
-            }
-            return hash;
-        }
-
-        private readonly bool ArraysEqual<T>(T[] a, T[] b) where T : IEquatable<T>
-        {
-            if (a.Length != b.Length) { return false; }
-
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (!a[i].Equals(b[i])) { return false; }
-            }
-
-            return true;
-        }
+        return true;
     }
 }

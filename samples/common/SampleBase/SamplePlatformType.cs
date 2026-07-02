@@ -1,8 +1,7 @@
-﻿namespace SampleBase
+namespace SampleBase;
+
+public enum SamplePlatformType
 {
-    public enum SamplePlatformType
-    {
-        Desktop,
-        Mobile,
-    }
+    Desktop,
+    Mobile,
 }

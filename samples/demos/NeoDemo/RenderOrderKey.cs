@@ -1,39 +1,38 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 
-namespace NeoVeldrid.NeoDemo
+namespace NeoVeldrid.NeoDemo;
+
+public struct RenderOrderKey : IComparable<RenderOrderKey>, IComparable
 {
-    public struct RenderOrderKey : IComparable<RenderOrderKey>, IComparable
+    public readonly ulong Value;
+
+    public RenderOrderKey(ulong value)
     {
-        public readonly ulong Value;
+        Value = value;
+    }
 
-        public RenderOrderKey(ulong value)
-        {
-            Value = value;
-        }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static RenderOrderKey Create(int materialID, float cameraDistance)
+        => Create((uint)materialID, cameraDistance);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static RenderOrderKey Create(int materialID, float cameraDistance)
-            => Create((uint)materialID, cameraDistance);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static RenderOrderKey Create(uint materialID, float cameraDistance)
+    {
+        uint cameraDistanceInt = (uint)Math.Min(uint.MaxValue, (cameraDistance * 1000f));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static RenderOrderKey Create(uint materialID, float cameraDistance)
-        {
-            uint cameraDistanceInt = (uint)Math.Min(uint.MaxValue, (cameraDistance * 1000f));
+        return new RenderOrderKey(
+            ((ulong)materialID << 32) +
+            cameraDistanceInt);
+    }
 
-            return new RenderOrderKey(
-                ((ulong)materialID << 32) +
-                cameraDistanceInt);
-        }
+    public readonly int CompareTo(RenderOrderKey other)
+    {
+        return Value.CompareTo(other.Value);
+    }
 
-        public readonly int CompareTo(RenderOrderKey other)
-        {
-            return Value.CompareTo(other.Value);
-        }
-
-        readonly int IComparable.CompareTo(object obj)
-        {
-            return Value.CompareTo(obj);
-        }
+    readonly int IComparable.CompareTo(object obj)
+    {
+        return Value.CompareTo(obj);
     }
 }

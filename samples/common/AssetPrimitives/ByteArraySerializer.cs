@@ -1,17 +1,16 @@
-﻿using System.IO;
+using System.IO;
 
-namespace AssetPrimitives
+namespace AssetPrimitives;
+
+public class ByteArraySerializer : BinaryAssetSerializer<byte[]>
 {
-    public class ByteArraySerializer : BinaryAssetSerializer<byte[]>
+    public override byte[] ReadT(BinaryReader reader)
     {
-        public override byte[] ReadT(BinaryReader reader)
-        {
-            return reader.ReadByteArray();
-        }
+        return reader.ReadByteArray();
+    }
 
-        public override void WriteT(BinaryWriter writer, byte[] value)
-        {
-            writer.WriteByteArray(value);
-        }
+    public override void WriteT(BinaryWriter writer, byte[] value)
+    {
+        writer.WriteByteArray(value);
     }
 }

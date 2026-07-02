@@ -1,12 +1,11 @@
-﻿namespace NeoVeldrid
+namespace NeoVeldrid;
+
+[System.Flags]
+public enum ModifierKeys
 {
-    [System.Flags]
-    public enum ModifierKeys
-    {
-        None = 0,
-        Alt = 1,
-        Control = 2,
-        Shift = 4,
-        Gui = 8,
-    }
+    None = 0,
+    Alt = 1,
+    Control = 2,
+    Shift = 4,
+    Gui = 8,
 }

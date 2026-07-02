@@ -1,21 +1,20 @@
-﻿using System;
+using System;
 using NeoVeldrid;
 
-namespace SampleBase
+namespace SampleBase;
+
+public interface ApplicationWindow
 {
-    public interface ApplicationWindow
-    {
-        SamplePlatformType PlatformType { get; }
+    SamplePlatformType PlatformType { get; }
 
-        event Action<float> Rendering;
-        event Action<GraphicsDevice, ResourceFactory, Swapchain> GraphicsDeviceCreated;
-        event Action GraphicsDeviceDestroyed;
-        event Action Resized;
-        event Action<KeyEvent> KeyPressed;
+    event Action<float> Rendering;
+    event Action<GraphicsDevice, ResourceFactory, Swapchain> GraphicsDeviceCreated;
+    event Action GraphicsDeviceDestroyed;
+    event Action Resized;
+    event Action<KeyEvent> KeyPressed;
 
-        uint Width { get; }
-        uint Height { get; }
+    uint Width { get; }
+    uint Height { get; }
 
-        void Run();
-    }
+    void Run();
 }
