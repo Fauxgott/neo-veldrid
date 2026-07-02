@@ -24,6 +24,7 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 - [Core] Using a `Framebuffer` or `ResourceSet` that references a disposed resource now throws instead of producing undefined behavior.
 - [StartupUtilities] Deprecated `NeoVeldridStartup.GetPlatformDefaultBackend` in favor of `GraphicsDevice.GetPlatformDefaultBackend`.
 - [Core] Deprecated `GraphicsApiVersion.TryParseGLVersion` in favor of `TryParseVersion`.
+- [Core] `IsBackendSupported` now returns false on macOS when `GraphicsBackend.OpenGL` is passed.
 
 ### Removed
 
