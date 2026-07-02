@@ -6,7 +6,7 @@ namespace NeoVeldrid.OpenGL
 {
     internal static partial class OpenGLVersionInfo
     {
-        [GeneratedRegex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?")]
+        [GeneratedRegex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?:(?<subminor>\d+)\.)?(?<patch>\d+))?")]
         private static partial Regex ParseVersionRegex();
 
         private static readonly object _lock = new();
