@@ -1,4 +1,4 @@
-﻿using static NeoVeldrid.OpenGL.OpenGLUtil;
+using static NeoVeldrid.OpenGL.OpenGLUtil;
 using System;
 using Silk.NET.Core.Loader;
 using Silk.NET.OpenGL;
@@ -181,7 +181,7 @@ namespace NeoVeldrid.OpenGL
             GL.GetInteger(GetPName.MinorVersion, out minorVersion);
             CheckLastError();
 
-            OpenGLVersionInfo.TryParseVersionString(_version, out _apiVersion);
+            GraphicsApiVersion.TryParseVersion(_version, out _apiVersion);
             if (_apiVersion.Major != majorVersion ||
                 _apiVersion.Minor != minorVersion)
             {
