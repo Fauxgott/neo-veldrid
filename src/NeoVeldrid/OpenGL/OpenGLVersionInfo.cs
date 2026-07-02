@@ -4,10 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace NeoVeldrid.OpenGL
 {
-    /// <summary>
-    /// Exposes utilities for obtaining and parsing OpenGL version strings.
-    /// </summary>
-    public static partial class OpenGLVersionInfo
+    internal static partial class OpenGLVersionInfo
     {
         [GeneratedRegex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?")]
         private static partial Regex ParseVersionRegex();
@@ -16,12 +13,6 @@ namespace NeoVeldrid.OpenGL
         private static GraphicsApiVersion _cachedOpenGLVersion = GraphicsApiVersion.Unknown;
         private static GraphicsApiVersion _cachedOpenGLESVersion = GraphicsApiVersion.Unknown;
 
-        /// <summary>
-        /// Attempts to parse the given OpenGL version string and extracts the version number without specific vendor or API information.
-        /// </summary>
-        /// <param name="versionString">The OpenGL version string to parse.</param>
-        /// <param name="version">The outputted <see cref="GraphicsApiVersion"/> containing the parsed OpenGL version.</param>
-        /// <returns>Returns true if the parse succeeded; otherwise false and the outputted <see cref="GraphicsApiVersion"/> will contain nothing.</returns>
         public static bool TryParseVersionString(string versionString, out GraphicsApiVersion version)
         {
             version = GraphicsApiVersion.Unknown;
@@ -58,7 +49,7 @@ namespace NeoVeldrid.OpenGL
             return false;
         }
 
-        internal static GraphicsApiVersion GetApiVersion(GraphicsBackend backend)
+        public static GraphicsApiVersion GetApiVersion(GraphicsBackend backend)
         {
             var result = GraphicsApiVersion.Unknown;
 

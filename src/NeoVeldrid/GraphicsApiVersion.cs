@@ -69,14 +69,11 @@ namespace NeoVeldrid
         }
 
         /// <summary>
-        /// Parses OpenGL version strings and extracts the version number without specific vendor or API information.
+        /// Attempts to parse the given OpenGL version string and extracts the version number without specific vendor or API information.
         /// </summary>
-        /// <param name="versionString">The OpenGL version string.</param>
-        /// <param name="version">The parsed <see cref="GraphicsApiVersion"/>.</param>
-        /// <returns>Returns true if the parse succeeded; otherwise false.</returns>
-        /// <remarks>This function has been deprecated in favor of
-        /// <see cref="OpenGL.OpenGLVersionInfo.TryParseVersionString(string, out GraphicsApiVersion)"/>.</remarks>
-        [Obsolete("This should not be publicly exposed and will be removed in a future version.")]
+        /// <param name="versionString">The OpenGL version string to parse.</param>
+        /// <param name="version">The outputted <see cref="GraphicsApiVersion"/> containing the parsed OpenGL version.</param>
+        /// <returns>Returns true if the parse succeeded; otherwise false and the outputted <see cref="GraphicsApiVersion"/> will contain nothing.</returns>
         public static bool TryParseGLVersion(string versionString, out GraphicsApiVersion version)
             => OpenGL.OpenGLVersionInfo.TryParseVersionString(versionString, out version);
 
