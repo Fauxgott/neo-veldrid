@@ -983,7 +983,7 @@ namespace NeoVeldrid
 #endif
                 case GraphicsBackend.OpenGL:
 #if !EXCLUDE_OPENGL_BACKEND
-                    return true;
+                    return !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #else
                     return false;
 #endif
@@ -996,6 +996,38 @@ namespace NeoVeldrid
                 default:
                     throw Illegal.Value<GraphicsBackend>();
             }
+        }
+
+        /// <summary>
+        /// Retrieves the latest API version of the given <see cref="GraphicsBackend"/>.
+        /// </summary>
+        /// <param name="backend">The <see cref="GraphicsBackend"/> to get the latest API version for.</param>
+        /// <returns>The latest API version of the given <see cref="GraphicsBackend"/>. If <see cref="GraphicsApiVersion.Unknown"/>
+        /// is returned, then the API was detected but the version was unable to be retrieved. If the API is not available
+        /// or included in the build, a <see cref="NeoVeldridException"/> will be thrown.</returns>
+        public static GraphicsApiVersion GetBackendVersion(GraphicsBackend backend)
+        {
+#if !EXCLUDE_D3D11_BACKEND
+            if (backend == GraphicsBackend.Direct3D11 && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return D3D11.D3D11GraphicsDevice.GetApiVersion();
+#endif
+#if !EXCLUDE_VULKAN_BACKEND
+            if (backend == GraphicsBackend.Vulkan && Vk.VkGraphicsDevice.IsSupported())
+                return Vk.VkGraphicsDevice.GetApiVersion();
+#endif
+#if !EXCLUDE_OPENGL_BACKEND
+            if (backend == GraphicsBackend.OpenGL || backend == GraphicsBackend.OpenGLES)
+            {
+                // Throw a specific exception to tell the user that the OpenGL backend
+                // doesn't support OSX.
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    throw new NeoVeldridException("The OpenGL backend doesn't support OSX/MacOS. Please use the Vulkan backend with MoltenVK.");
+
+                return OpenGL.OpenGLVersionInfo.GetApiVersion(backend);
+            }
+#endif
+
+            throw new NeoVeldridException("The provided graphics backend is either not supported, not included in the build, or out of bounds of the enumerator type.");
         }
 
         /// <summary>

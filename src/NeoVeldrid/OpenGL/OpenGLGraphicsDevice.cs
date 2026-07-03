@@ -1,4 +1,4 @@
-﻿using static NeoVeldrid.OpenGL.OpenGLUtil;
+using static NeoVeldrid.OpenGL.OpenGLUtil;
 using System;
 using Silk.NET.Core.Loader;
 using Silk.NET.OpenGL;
@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using static NeoVeldrid.OpenGL.EGL.EGLNative;
 using System.Runtime.CompilerServices;
 
 namespace NeoVeldrid.OpenGL

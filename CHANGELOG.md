@@ -15,12 +15,14 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 - [Core] `NeoVeldridMappedResourceException` (a `NeoVeldridException` subtype) thrown for mapped-resource errors, carrying the offending `Resource`/`Subresource`, so callers can catch and inspect them specifically.
 - [Core] `NeoVeldridDisposedResourceException` (a `NeoVeldridException` subtype) thrown when a `Framebuffer` or `ResourceSet` references a disposed resource, carrying the offending `Resource` so callers can catch and inspect it specifically.
 - [Core] `GraphicsDevice.GetPlatformDefaultBackend` method that retrieves the default `GraphicsBackend` for the executing platform, chosen by order of availability if a backend is not supported or included in the build.
+- [Core] `GraphicsDevice.GetBackendVersion` method that retrieves the latest API version of the given `GraphicsBackend`.
 
 ### Changed
 
 - [OpenGL] Binding a currently-mapped buffer as a vertex or index buffer now throws instead of producing undefined behavior.
 - [Core] Using a `Framebuffer` or `ResourceSet` that references a disposed resource now throws instead of producing undefined behavior.
 - [StartupUtilities] Deprecated `NeoVeldridStartup.GetPlatformDefaultBackend` in favor of `GraphicsDevice.GetPlatformDefaultBackend`.
+- [Core] `IsBackendSupported` now returns false on macOS when `GraphicsBackend.OpenGL` is passed.
 
 ### Removed
 
@@ -36,6 +38,9 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 - Removed dead Android and iOS code paths left over from the Silk.NET port.
 - Simplified and improved the `samples` directory structure in the repository to make it easier to read and navigate. 
 - Fixed spelling issues across XML-docs.
+- Added `OpenGLVersionInfo` type that retrieves the latest OpenGL or OpenGL ES version on the executing platform, with four backends: `OpenGLWglVersionProber`, `OpenGLAngleVersionProber`, `OpenGLEglVersionProber`, and `OpenGLGlxVersionProber`.
+- Added `GetApiVersion` method to `VkGraphicsDevice` that retrieves the latest Vulkan version on the executing platform.
+- Added `GetApiVersion` method to `D3D11GraphicsDevice` that retrieves the latest Direct3D11 version on the executing platform.
 
 ## [1.1.0] - 2026-05-25
 
