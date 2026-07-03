@@ -8,7 +8,7 @@ namespace NeoVeldrid
     /// </summary>
     public readonly partial struct GraphicsApiVersion : IEquatable<GraphicsApiVersion>
     {
-        [GeneratedRegex(@"(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<subminor>\d+)(?:\.(?<patch>\d+))?)?)?")]
+        [GeneratedRegex(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?")]
         private static partial Regex ParseVersionRegex();
 
         /// <summary>
@@ -16,42 +16,22 @@ namespace NeoVeldrid
         /// </summary>
         public static GraphicsApiVersion Unknown => default;
 
-        /// <summary>
-        /// Gets the major version component of the graphics API.
-        /// </summary>
-        /// <value>
-        /// An <see cref="int"/> representing breaking changes, paradigm shifts, or feature overhauls in the
-        /// underlying graphics API (e.g., the '4' in OpenGL 4.6).
-        /// </value>
+        /// <summary>The major version component (e.g. the <c>4</c> in OpenGL 4.6).</summary>
         public int Major { get; }
 
-        /// <summary>
-        /// Gets the minor version component of the graphics API.
-        /// </summary>
-        /// <value>
-        /// An <see cref="int"/> representing backwards-compatible feature additions or revisions introduced
-        /// within the current <see cref="Major"/> lifecycle (e.g., the '6' in OpenGL 4.6).
-        /// </value>
+        /// <summary>The minor version component (e.g. the <c>6</c> in OpenGL 4.6).</summary>
         public int Minor { get; }
 
         /// <summary>
-        /// Gets the sub-minor version component of the graphics API.
+        /// The sub-minor version component, between <see cref="Minor"/> and <see cref="Patch"/>. Only a
+        /// four-part version (such as a Vulkan conformance version) populates it, so it is typically 0.
         /// </summary>
-        /// <value>
-        /// An <see cref="int"/> representing minor internal revision levels or driver-specific configurations.
-        /// </value>
-        /// <remarks>When <see cref="GraphicsDevice.GetBackendVersion(GraphicsBackend)"/> is called, this value
-        /// is left unset.</remarks>
         public int Subminor { get; }
 
         /// <summary>
-        /// Gets the patch version component of the graphics API.
+        /// The patch or release version component (e.g. the release number in an OpenGL version string,
+        /// or a Vulkan patch level).
         /// </summary>
-        /// <value>
-        /// An <see cref="int"/> representing maintenance revisions, bug fixes, or micro-optimizations that do
-        /// not alter the broader public API or introduce brand-new features (e.g. minor Vulkan updates or driver
-        /// runtime versions).
-        /// </value>
         public int Patch { get; }
 
         /// <summary>
@@ -66,12 +46,6 @@ namespace NeoVeldrid
             Subminor = subminor;
             Patch = patch;
         }
-        public GraphicsApiVersion(string version)
-        {
-            bool result = TryParseVersion(version, out this);
-            if (!result)
-                throw new NeoVeldridException("Failed to parse version string!");
-        }
 
         public override string ToString()
         {
@@ -79,12 +53,13 @@ namespace NeoVeldrid
         }
 
         /// <summary>
-        /// Attempts to parse the given version string and extracts the version number without specific vendor or API information.
+        /// Attempts to parse an OpenGL or OpenGL ES version string, extracting the version number and
+        /// ignoring any surrounding vendor or API text.
         /// </summary>
-        /// <param name="versionString">The version string to parse.</param>
-        /// <param name="version">The outputted <see cref="GraphicsApiVersion"/> containing the parsed version string.</param>
-        /// <returns>Returns true if the parse succeeded; otherwise false and the outputted <see cref="GraphicsApiVersion"/> will contain nothing.</returns>
-        public static bool TryParseVersion(string versionString, out GraphicsApiVersion version)
+        /// <param name="versionString">The version string to parse (e.g. <c>"4.6.0 NVIDIA 551.23"</c>).</param>
+        /// <param name="version">The parsed version, or <see cref="Unknown"/> if parsing fails.</param>
+        /// <returns><see langword="true"/> if the string was parsed successfully; otherwise <see langword="false"/>.</returns>
+        public static bool TryParseGLVersion(string versionString, out GraphicsApiVersion version)
         {
             version = GraphicsApiVersion.Unknown;
 
@@ -93,48 +68,30 @@ namespace NeoVeldrid
                 if (string.IsNullOrWhiteSpace(versionString))
                     break;
 
-                // OpenGL / OpenGL ES version strings can have a bunch of boilerplate
-                // like vendor information, so this Regex strips it out and just gives
-                // us the relevant numbers.
+                // OpenGL / OpenGL ES version strings can carry vendor boilerplate around the
+                // number, so this Regex pulls out just the version components.
                 Match match = ParseVersionRegex().Match(versionString);
                 if (!match.Success)
                     break;
 
                 int major = int.Parse(match.Groups["major"].Value);
+                int minor = int.Parse(match.Groups["minor"].Value);
 
-                int minor = 0;
-                if (match.Groups["minor"].Success)
-                    minor = int.Parse(match.Groups["minor"].Value);
-
-                int subminor = 0;
-                if (match.Groups["subminor"].Success)
-                    subminor = int.Parse(match.Groups["subminor"].Value);
-
+                // Versions are major.minor[.patch]. The optional third component (an OpenGL release
+                // number or a patch level) maps to Patch, leaving Subminor 0 to match how the Vulkan
+                // and Direct3D backends construct this struct.
                 int patch = 0;
                 if (match.Groups["patch"].Success)
                     patch = int.Parse(match.Groups["patch"].Value);
 
-                version = new GraphicsApiVersion(major, minor, subminor, patch);
+                version = new GraphicsApiVersion(major, minor, 0, patch);
 
                 break;
             }
             while (true);
 
-            if (version != GraphicsApiVersion.Unknown)
-                return true;
-
-            return false;
+            return version != GraphicsApiVersion.Unknown;
         }
-
-        /// <summary>
-        /// Attempts to parse the given OpenGL version string and extracts the version number without specific vendor or API information.
-        /// </summary>
-        /// <param name="versionString">The OpenGL version string to parse.</param>
-        /// <param name="version">The outputted <see cref="GraphicsApiVersion"/> containing the parsed OpenGL version.</param>
-        /// <returns>Returns true if the parse succeeded; otherwise false and the outputted <see cref="GraphicsApiVersion"/> will contain nothing.</returns>
-        [Obsolete("This method has been deprecated in favor of TryParseVersion(string, out GraphicsApiVersion) and will be removed in a future version.")]
-        public static bool TryParseGLVersion(string versionString, out GraphicsApiVersion version)
-            => TryParseVersion(versionString, out version);
 
         public override int GetHashCode() => HashCode.Combine(Major, Minor, Subminor, Patch);
 

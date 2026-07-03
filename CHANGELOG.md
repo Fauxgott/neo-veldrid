@@ -16,14 +16,12 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 - [Core] `NeoVeldridDisposedResourceException` (a `NeoVeldridException` subtype) thrown when a `Framebuffer` or `ResourceSet` references a disposed resource, carrying the offending `Resource` so callers can catch and inspect it specifically.
 - [Core] `GraphicsDevice.GetPlatformDefaultBackend` method that retrieves the default `GraphicsBackend` for the executing platform, chosen by order of availability if a backend is not supported or included in the build.
 - [Core] `GraphicsDevice.GetBackendVersion` method that retrieves the latest API version of the given `GraphicsBackend`.
-- [Core] `TryParseVersion` method to `GraphicsApiVersion` that attempts to parse the given version string and extracts the version number without specific vendor or API information. A constructor was also added that calls `TryGetVersion`.
 
 ### Changed
 
 - [OpenGL] Binding a currently-mapped buffer as a vertex or index buffer now throws instead of producing undefined behavior.
 - [Core] Using a `Framebuffer` or `ResourceSet` that references a disposed resource now throws instead of producing undefined behavior.
 - [StartupUtilities] Deprecated `NeoVeldridStartup.GetPlatformDefaultBackend` in favor of `GraphicsDevice.GetPlatformDefaultBackend`.
-- [Core] Deprecated `GraphicsApiVersion.TryParseGLVersion` in favor of `TryParseVersion`.
 - [Core] `IsBackendSupported` now returns false on macOS when `GraphicsBackend.OpenGL` is passed.
 
 ### Removed

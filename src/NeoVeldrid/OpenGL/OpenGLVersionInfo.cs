@@ -64,7 +64,7 @@ namespace NeoVeldrid.OpenGL
                     }
                 }
 
-                GraphicsApiVersion.TryParseVersion(versionString, out result);
+                GraphicsApiVersion.TryParseGLVersion(versionString, out result);
 
                 // If the OpenGL version < 3.2, we have failed to return a valid OpenGL version.
                 if (backend == GraphicsBackend.OpenGL &&
