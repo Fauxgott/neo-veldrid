@@ -1,14 +1,13 @@
-﻿using SampleBase;
+using SampleBase;
 
-namespace ComputeTexture
+namespace ComputeTexture;
+
+class Program
 {
-    class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Compute Texture");
-            ComputeTexture computeTexture = new ComputeTexture(window);
-            window.Run();
-        }
+        NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Compute Texture");
+        ComputeTexture computeTexture = new ComputeTexture(window);
+        window.Run();
     }
 }

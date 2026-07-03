@@ -1,9 +1,8 @@
-﻿namespace NeoVeldrid.Utilities
+namespace NeoVeldrid.Utilities;
+
+public enum ContainmentType
 {
-    public enum ContainmentType
-    {
-        Disjoint,
-        Contains,
-        Intersects,
-    }
+    Disjoint,
+    Contains,
+    Intersects,
 }

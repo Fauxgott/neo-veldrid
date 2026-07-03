@@ -1,16 +1,15 @@
-﻿using System;
+using System;
 
-namespace NeoVeldrid
+namespace NeoVeldrid;
+
+internal static class Illegal
 {
-    internal static class Illegal
+    internal static Exception Value<T>()
     {
-        internal static Exception Value<T>()
-        {
-            return new IllegalValueException<T>();
-        }
+        return new IllegalValueException<T>();
+    }
 
-        internal class IllegalValueException<T> : NeoVeldridException
-        {
-        }
+    internal class IllegalValueException<T> : NeoVeldridException
+    {
     }
 }

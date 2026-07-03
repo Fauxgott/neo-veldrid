@@ -1,14 +1,13 @@
 using SampleBase;
 
-namespace AnimatedMesh
+namespace AnimatedMesh;
+
+class Program
 {
-    class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Animated Mesh");
-            AnimatedMesh animatedMesh = new AnimatedMesh(window);
-            window.Run();
-        }
+        NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Animated Mesh");
+        AnimatedMesh animatedMesh = new AnimatedMesh(window);
+        window.Run();
     }
 }

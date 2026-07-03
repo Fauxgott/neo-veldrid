@@ -1,18 +1,17 @@
-﻿using System.Numerics;
+using System.Numerics;
 
-namespace NeoVeldrid.Utilities
+namespace NeoVeldrid.Utilities;
+
+public struct RayCastHit<T>
 {
-    public struct RayCastHit<T>
-    {
-        public readonly T Item;
-        public readonly Vector3 Location;
-        public readonly float Distance;
+    public readonly T Item;
+    public readonly Vector3 Location;
+    public readonly float Distance;
 
-        public RayCastHit(T item, Vector3 location, float distance)
-        {
-            Item = item;
-            Location = location;
-            Distance = distance;
-        }
+    public RayCastHit(T item, Vector3 location, float distance)
+    {
+        Item = item;
+        Location = location;
+        Distance = distance;
     }
 }

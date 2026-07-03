@@ -1,10 +1,9 @@
-namespace NeoVeldrid.NeoDemo
+namespace NeoVeldrid.NeoDemo;
+
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            new NeoDemo().Run();
-        }
+        new NeoDemo().Run();
     }
 }

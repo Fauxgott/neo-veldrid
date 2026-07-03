@@ -1,12 +1,11 @@
-﻿namespace NeoVeldrid.Utilities
+namespace NeoVeldrid.Utilities;
+
+public struct OrthographicBounds
 {
-    public struct OrthographicBounds
-    {
-        public float MinX;
-        public float MaxX;
-        public float MinY;
-        public float MaxY;
-        public float MinZ;
-        public float MaxZ;
-    }
+    public float MinX;
+    public float MaxX;
+    public float MinY;
+    public float MaxY;
+    public float MinZ;
+    public float MaxZ;
 }

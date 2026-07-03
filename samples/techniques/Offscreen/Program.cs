@@ -1,14 +1,13 @@
 using SampleBase;
 
-namespace Offscreen
+namespace Offscreen;
+
+class Program
 {
-    class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Offscreen");
-            OffscreenApplication offscreen = new OffscreenApplication(window);
-            window.Run();
-        }
+        NeoVeldridStartupWindow window = new NeoVeldridStartupWindow("Offscreen");
+        OffscreenApplication offscreen = new OffscreenApplication(window);
+        window.Run();
     }
 }
