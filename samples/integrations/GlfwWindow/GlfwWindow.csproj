@@ -6,6 +6,7 @@
 
     <ItemGroup>
         <ProjectReference Include="$(RootDir)\src\NeoVeldrid\NeoVeldrid.csproj" />
+        <PackageReference Include="Silk.NET.GLFW" />
     </ItemGroup>
 
 </Project>
