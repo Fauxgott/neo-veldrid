@@ -26,6 +26,7 @@ Samples demonstrating how to integrate popular third-party libraries with NeoVel
 | Sample | Description | Run command |
 |--------|-------------|-------------|
 | **FontStashText** | Render fonts and text with [FontStashSharp](https://github.com/FontStashSharp/FontStashSharp). | `dotnet run --project samples/integrations/FontStashText/FontStashText.csproj` |
+| **GlfwWindow** | An implementation of `GettingStarted` using [GLFW](https://www.glfw.org/). | `dotnet run --project samples/integrations/GlfwWindow/GlfwWindow.csproj` |
 
 ## Full Demos
 
