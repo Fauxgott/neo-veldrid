@@ -18,6 +18,7 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 ### Internal
 
 - Migrated the test projects to xUnit v3.
+- [Samples] Added a GLFW windowing sample under `samples/integrations`.
 
 ## [1.2.0] - 2026-07-03
 
