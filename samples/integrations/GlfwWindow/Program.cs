@@ -4,7 +4,6 @@ using NeoVeldrid.SPIRV;
 using Silk.NET.GLFW;
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace GlfwWindow;
@@ -63,7 +62,7 @@ void main()
         // Populate bindings and initialize GLFW.
         _glfw = Glfw.GetApi();
         if (!_glfw.Init())
-            throw new Exception("Failed to initialize GLFW.");
+            throw new InvalidOperationException("Failed to initialize GLFW.");
 
         // GLFW handles the OpenGL context itself, but if we use another backend we need
         // to tell GLFW not to create the OpenGL context.
@@ -76,8 +75,9 @@ void main()
                 ? ClientApi.OpenGL
                 : ClientApi.OpenGLES);
 
-            _glfw.WindowHint(WindowHintInt.ContextVersionMajor, version.Major); // Max GL version.
-            _glfw.WindowHint(WindowHintInt.ContextVersionMinor, version.Minor); // Max GL version.
+            // Ask for the newest version the driver reports.
+            _glfw.WindowHint(WindowHintInt.ContextVersionMajor, version.Major);
+            _glfw.WindowHint(WindowHintInt.ContextVersionMinor, version.Minor);
 
             // Disables the default 24-bit depth buffer.
             _glfw.WindowHint(WindowHintInt.DepthBits, 0);
@@ -86,7 +86,10 @@ void main()
             if (backend == GraphicsBackend.OpenGL)
                 _glfw.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core);
         }
-        else _glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.NoApi);
+        else
+        {
+            _glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.NoApi);
+        }
 
         int width = 960;
         int height = 540;
@@ -94,7 +97,7 @@ void main()
         if (_hwnd == null)
         {
             _glfw.Terminate(); // We can't continue from this point on, so we need to dispose of GLFW.
-            throw new Exception("Failed to create GLFW window.");
+            throw new InvalidOperationException("Failed to create GLFW window.");
         }
 
         // Create the GraphicsDevice for the specified backend and attach it to the GLFW window.
@@ -230,7 +233,7 @@ void main()
         _graphicsDevice.SwapBuffers();
     }
 
-    public static void DisposeResources()
+    private static void DisposeResources()
     {
         _pipeline.Dispose();
         foreach (Shader shader in _shaders)
@@ -243,12 +246,18 @@ void main()
         _graphicsDevice.Dispose();
     }
 
-    public static void CreateGraphicsDevice(GraphicsBackend backend, GraphicsDeviceOptions options, int width, int height)
+    private static void CreateGraphicsDevice(
+        GraphicsBackend backend,
+        GraphicsDeviceOptions options,
+        int width,
+        int height)
     {
         if (backend == GraphicsBackend.OpenGL || backend == GraphicsBackend.OpenGLES)
         {
             _glfw.MakeContextCurrent(_hwnd);
 
+            // The shorter overload is intentional: leaving setSwapchainFramebuffer unset is what makes
+            // NeoVeldrid bind the default framebuffer (FBO 0), which is the one GLFW presents from.
             var platformInfo = new OpenGLPlatformInfo(
                 openGLContextHandle: (nint)_hwnd,
                 getProcAddress: name => (nint)_glfw.GetProcAddress(name),
@@ -257,46 +266,15 @@ void main()
                 clearCurrentContext: () => _glfw.MakeContextCurrent(null),
                 deleteContext: _ => { }, // GLFW handles context cleanup when DestroyWindow is called.
                 swapBuffers: () => _glfw.SwapBuffers(_hwnd),
-                setSyncToVerticalBlank: sync => _glfw.SwapInterval(sync ? 1 : 0),
-                setSwapchainFramebuffer: () => { },
-                resizeSwapchain: (w, h) => { }
+                setSyncToVerticalBlank: sync => _glfw.SwapInterval(sync ? 1 : 0)
             );
 
             _graphicsDevice = GraphicsDevice.CreateOpenGL(options, platformInfo, (uint)width, (uint)height);
         }
         else
         {
-            var nativeWindow = new GlfwNativeWindow(_glfw, _hwnd);
-            SwapchainSource source = null;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && nativeWindow.Win32.HasValue)
-            {
-                source = SwapchainSource.CreateWin32(
-                    nativeWindow.Win32.Value.Hwnd,
-                    nativeWindow.Win32.Value.HInstance
-                );
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                if (nativeWindow.Wayland.HasValue)
-                {
-                    source = SwapchainSource.CreateWayland(
-                        nativeWindow.Wayland.Value.Display,
-                        nativeWindow.Wayland.Value.Surface
-                    );
-                }
-                if (nativeWindow.X11.HasValue)
-                {
-                    source = SwapchainSource.CreateXlib(
-                        (nint)nativeWindow.X11.Value.Display,
-                        (nint)nativeWindow.X11.Value.Window
-                    );
-                }
-            }
-            else throw new PlatformNotSupportedException($"The {backend} backend does not support SwapchainSource creation.");
-
             var swapchainDesc = new SwapchainDescription(
-                source,
+                CreateSwapchainSource(),
                 (uint)width,
                 (uint)height,
                 options.SwapchainDepthFormat,
@@ -317,6 +295,45 @@ void main()
                 throw new PlatformNotSupportedException($"The {backend} backend is not supported.");
             }
         }
+    }
+
+    private static SwapchainSource CreateSwapchainSource()
+    {
+        var nativeWindow = new GlfwNativeWindow(_glfw, _hwnd);
+
+        // GLFW only fills in the handles for the windowing system it is running on, so the first
+        // one with a value is the one to build the SwapchainSource from.
+        if (nativeWindow.Win32.HasValue)
+        {
+            return SwapchainSource.CreateWin32(
+                nativeWindow.Win32.Value.Hwnd,
+                nativeWindow.Win32.Value.HInstance
+            );
+        }
+
+        if (nativeWindow.Wayland.HasValue)
+        {
+            return SwapchainSource.CreateWayland(
+                nativeWindow.Wayland.Value.Display,
+                nativeWindow.Wayland.Value.Surface
+            );
+        }
+
+        if (nativeWindow.X11.HasValue)
+        {
+            return SwapchainSource.CreateXlib(
+                (nint)nativeWindow.X11.Value.Display,
+                (nint)nativeWindow.X11.Value.Window
+            );
+        }
+
+        if (nativeWindow.Cocoa.HasValue)
+        {
+            return SwapchainSource.CreateNSWindow(nativeWindow.Cocoa.Value);
+        }
+
+        throw new PlatformNotSupportedException(
+            "GLFW did not report a native window handle that NeoVeldrid can create a SwapchainSource from.");
     }
 }
 
