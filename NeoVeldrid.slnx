@@ -9,6 +9,7 @@
     </Folder>
     <Folder Name="/samples/integrations/">
         <Project Path="samples/integrations/FontStashText/FontStashText.csproj" />
+        <Project Path="samples/integrations/GlfwWindow/GlfwWindow.csproj" />
     </Folder>
     <Folder Name="/samples/techniques/">
         <Project Path="samples/techniques/AnimatedMesh/AnimatedMesh.csproj" />

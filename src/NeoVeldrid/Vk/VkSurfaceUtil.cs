@@ -187,22 +187,29 @@ internal static unsafe class VkSurfaceUtil
 
     private static IntPtr GetOrCreateMetalLayer(IntPtr nsView)
     {
-        // Ensure the view is layer-backed
-        ObjC.MsgSendBool(nsView, ObjC.Sel("setWantsLayer:"), 1);
-
         IntPtr layer = ObjC.MsgSend(nsView, ObjC.Sel("layer"));
         IntPtr caMetalLayerClass = ObjC.GetClass("CAMetalLayer");
 
-        if (layer != IntPtr.Zero && ObjC.MsgSendBool_Ret(layer, ObjC.Sel("isKindOfClass:"), caMetalLayerClass))
+        if (layer == IntPtr.Zero || !ObjC.MsgSendBool_Ret(layer, ObjC.Sel("isKindOfClass:"), caMetalLayerClass))
         {
-            return layer;
+            layer = ObjC.MsgSend(caMetalLayerClass, ObjC.Sel("alloc"));
+            layer = ObjC.MsgSend(layer, ObjC.Sel("init"));
+
+            if (ObjC.MsgSendBool_Ret(nsView, ObjC.Sel("wantsBestResolutionOpenGLSurface")))
+            {
+                IntPtr window = ObjC.MsgSend(nsView, ObjC.Sel("window"));
+                if (window != IntPtr.Zero)
+                {
+                    double contentsScale = ObjC.MsgSendDouble_Ret(window, ObjC.Sel("backingScaleFactor"));
+                    ObjC.MsgSendDouble(layer, ObjC.Sel("setContentsScale:"), contentsScale);
+                }
+            }
+
+            ObjC.MsgSendPtr(nsView, ObjC.Sel("setLayer:"), layer);
         }
 
-        // Create a new CAMetalLayer and set it on the view
-        IntPtr metalLayer = ObjC.MsgSend(caMetalLayerClass, ObjC.Sel("alloc"));
-        metalLayer = ObjC.MsgSend(metalLayer, ObjC.Sel("init"));
-        ObjC.MsgSendPtr(nsView, ObjC.Sel("setLayer:"), metalLayer);
-        return metalLayer;
+        ObjC.MsgSendBool(nsView, ObjC.Sel("setWantsLayer:"), 1);
+        return layer;
     }
 
     // Minimal ObjC runtime P/Invoke for macOS surface creation.
@@ -225,6 +232,16 @@ internal static unsafe class VkSurfaceUtil
 
         [DllImport(Lib, EntryPoint = "objc_msgSend")]
         public static extern void MsgSendBool(IntPtr receiver, IntPtr selector, byte arg);
+
+        [DllImport(Lib, EntryPoint = "objc_msgSend")]
+        public static extern void MsgSendDouble(IntPtr receiver, IntPtr selector, double arg);
+
+        [DllImport(Lib, EntryPoint = "objc_msgSend")]
+        public static extern double MsgSendDouble_Ret(IntPtr receiver, IntPtr selector);
+
+        [DllImport(Lib, EntryPoint = "objc_msgSend")]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool MsgSendBool_Ret(IntPtr receiver, IntPtr selector);
 
         [DllImport(Lib, EntryPoint = "objc_msgSend")]
         [return: MarshalAs(UnmanagedType.U1)]

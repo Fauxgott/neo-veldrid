@@ -14,10 +14,12 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 - [SDL2] Window creation failures now report the actual SDL error instead of always saying "Invalid window".
 - [SDL2] A failed window creation no longer hangs the `Sdl2Window` constructor when `threadedProcessing` is enabled.
 - [Vulkan] Fixed stale reads when draws, dispatches, or buffer copies consume compute shader output in the same command list.
+- [Vulkan] Fixed flashing and repeated swapchain recreation when presenting to high-DPI GLFW windows on macOS.
 
 ### Internal
 
 - Migrated the test projects to xUnit v3.
+- [Samples] Added a GLFW windowing sample under `samples/integrations`.
 
 ## [1.2.0] - 2026-07-03
 
