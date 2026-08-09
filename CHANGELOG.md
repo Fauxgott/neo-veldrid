@@ -9,6 +9,10 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-08-09
+
+NeoVeldrid now feels properly at home on macOS. If you target macOS, make sure you update to this release.
+
 ### Fixed
 
 - [SDL2] Window creation failures now report the actual SDL error instead of always saying "Invalid window".
@@ -23,6 +27,9 @@ In addition to SemVer defaults, an "Internal" section is used to denote changes 
 ### Internal
 
 - Migrated the test projects to xUnit v3.
+- Added macOS CI coverage and enabled the Vulkan test suite on macOS.
+- [Vulkan] Modernized the Objective-C interop used to create macOS surfaces.
+- [Vulkan] Removed the obsolete `VK_MVK_macos_surface` fallback in favor of `VK_EXT_metal_surface`, which is supported by the bundled MoltenVK version.
 - [Samples] Added a GLFW windowing sample under `samples/integrations`.
 
 ## [1.2.0] - 2026-07-03
@@ -140,7 +147,8 @@ First release of NeoVeldrid. A maintained, drop-in replacement for [Veldrid](htt
 - [Samples] The AnimatedMesh sample now renders correctly on OpenGL and OpenGL ES.
 - [Samples] The ComputeParticles sample now renders correctly on D3D11.
 
-[Unreleased]: https://github.com/jhm-ciberman/neo-veldrid/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/jhm-ciberman/neo-veldrid/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/jhm-ciberman/neo-veldrid/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/jhm-ciberman/neo-veldrid/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/jhm-ciberman/neo-veldrid/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/jhm-ciberman/neo-veldrid/releases/tag/v1.0.0
